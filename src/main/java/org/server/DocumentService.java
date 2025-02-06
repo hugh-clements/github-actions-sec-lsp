@@ -3,9 +3,19 @@ package org.server;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class DocumentService implements TextDocumentService {
+
+    private final Map<String, DocumentModel> docs = Collections.synchronizedMap(new HashMap<>());
+    private final LanguageServer LanguageServer;
+
+    public DocumentService(LanguageServer LanguageServer) {
+        this.LanguageServer = LanguageServer;
+    }
 
     @Override
     public CompletableFuture<Hover> hover(HoverParams params) {
@@ -19,7 +29,9 @@ public class DocumentService implements TextDocumentService {
 
     @Override
     public void didOpen(DidOpenTextDocumentParams didOpenTextDocumentParams) {
-
+        DocumentModel model = new DocumentModel(didOpenTextDocumentParams.getTextDocument().getText());
+        this.docs.put(didOpenTextDocumentParams.getTextDocument().getUri(),
+                model);
     }
 
     @Override
