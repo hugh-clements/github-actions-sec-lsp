@@ -1,5 +1,6 @@
 package org.server;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.DiagnosticRegistrationOptions;
@@ -18,6 +19,7 @@ public class LanguageServer  implements org.eclipse.lsp4j.services.LanguageServe
     Logger logger = LogManager.getLogger();
     private final DocumentService documentService;
     private final WorkspaceService workspaceService;
+    public LanguageClient client;
 
     public LanguageServer() {
         documentService = new DocumentService(this);
@@ -59,4 +61,5 @@ public class LanguageServer  implements org.eclipse.lsp4j.services.LanguageServe
     public void connect(LanguageClient languageClient) {
         logger.info("Connecting to LanguageClient");
     }
+
 }

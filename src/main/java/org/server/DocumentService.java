@@ -4,18 +4,25 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.TextDocumentService;
+import org.server.diagnostic.DiagnosticService;
 import org.server.document.DocumentModel;
+import org.server.document.ModelConstructorService;
 
 import java.util.concurrent.CompletableFuture;
 
 public class DocumentService implements TextDocumentService {
 
-    private final LanguageServer LanguageServer;
+    private final LanguageServer languageServer;
     Logger logger = LogManager.getLogger();
+    private DocumentModel documentModel;
+    private ModelConstructorService modelConstructorService;
+    private DiagnosticService diagnosticService;
 
 
-    public DocumentService(LanguageServer LanguageServer) {
-        this.LanguageServer = LanguageServer;
+    public DocumentService(LanguageServer languageServer) {
+        this.languageServer = languageServer;
+        modelConstructorService = new ModelConstructorService();
+        diagnosticService = new DiagnosticService();
     }
 
     @Override
@@ -33,14 +40,29 @@ public class DocumentService implements TextDocumentService {
     @Override
     public void didOpen(DidOpenTextDocumentParams didOpenTextDocumentParams) {
         logger.info("didOpen");
-        //TODO something with the doc should happen here
-        DocumentModel model = new DocumentModel();
+
+        this.documentModel = modelConstructorService.modelConstructor();
+
+        CompletableFuture.runAsync(() -> {
+            languageServer.client.publishDiagnostics(
+                    new PublishDiagnosticsParams(didOpenTextDocumentParams.getTextDocument().getUri(),
+                            diagnosticService.diagnose(documentModel))
+            );
+        });
     }
 
     @Override
     public void didChange(DidChangeTextDocumentParams didChangeTextDocumentParams) {
         logger.info("didChange");
-        //TODO something with the doc should happen here
+
+        this.documentModel = modelConstructorService.modelConstructor();
+
+        CompletableFuture.runAsync(() -> {
+            languageServer.client.publishDiagnostics(
+                    new PublishDiagnosticsParams(didChangeTextDocumentParams.getTextDocument().getUri(),
+                            diagnosticService.diagnose(documentModel))
+            );
+        });
     }
 
     @Override

@@ -5,13 +5,14 @@ import java.util.List;
 public class DocumentModel {
 
     public DocumentModel() {
-        var test = new Model("testname","run-test",null,null, null,null);
+        var test = new Model("testname","run-test", null,null,null, null,null);
     }
 
     public record Model(
             String name,
             String runName,
             OnObject on,
+            Defaults defaults,
             List<Job> jobs,
             Secrets.Permissions permission,
             Concurrency concurrency
@@ -24,8 +25,8 @@ public class DocumentModel {
 
     public record Event(
             String event,
-            List<String> type,
             List<Filter> filter,
+            List<String> type,
             Schedule schedule
     ) {}
 
@@ -51,6 +52,7 @@ public class DocumentModel {
             String name,
             Secrets.Permissions permissions,
             String condition,
+            List<String> needs,
             List<Runner> runsOn,
             Env env,
             Concurrency concurrency,
@@ -77,17 +79,14 @@ public class DocumentModel {
         macos_latest
     }
 
-    public record Need(
-            List<String> jobs
-    ) {}
-
     public record Concurrency(
             String group,
             Boolean cancelInProgress
     ) {}
 
     public record Defaults(
-            String defaults
+            String shell,
+            String workingDirectory
     ) {}
 
     public record Steps(

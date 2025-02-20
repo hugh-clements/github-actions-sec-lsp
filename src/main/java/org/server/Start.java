@@ -24,6 +24,7 @@ public class Start {
         LanguageServer server = new LanguageServer();
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(server, in, out);
         LanguageClient client = launcher.getRemoteProxy();
+        server.client = client;
         server.connect(client);
         Future<Void> future = launcher.startListening();
         future.get();
