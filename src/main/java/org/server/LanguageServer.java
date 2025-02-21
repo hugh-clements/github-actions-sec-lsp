@@ -1,6 +1,4 @@
 package org.server;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.*;
@@ -13,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class LanguageServer  implements org.eclipse.lsp4j.services.LanguageServer, LanguageClientAware {
 
-    Logger logger = LogManager.getLogger();
+    Logger logger = LogManager.getLogger(getClass());
     private final DocumentService documentService;
     private final WorkspaceService workspaceService;
     public LanguageClient client;
@@ -58,7 +56,7 @@ public class LanguageServer  implements org.eclipse.lsp4j.services.LanguageServe
 
     @Override
     public void connect(LanguageClient languageClient) {
-        logger.info("Connecting to LanguageClient");
+
     }
 
 }

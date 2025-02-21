@@ -13,7 +13,7 @@ import java.util.concurrent.Future;
 
 public class Start {
 
-    Logger logger = LogManager.getLogger();
+    Logger logger = LogManager.getLogger(getClass());
 
     void main(String[] args) throws ExecutionException, InterruptedException {
         startServer(System.in, System.out);

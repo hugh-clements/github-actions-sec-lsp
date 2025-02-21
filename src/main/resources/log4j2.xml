@@ -1,13 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
+<Configuration status="WARN">
+    <Properties>
+        <!-- Generate a unique timestamped filename per run -->
+        <Property name="logfileName">logs/server-${date:yyyy-MM-dd-HH-mm-ss}.log</Property>
+    </Properties>
+
     <Appenders>
-        <File name="File" fileName="log/out.log" append="false" >
-            <PatternLayout pattern="%-5p [%t]: %m%n"/>
+        <!-- File appender with a unique filename per run -->
+        <File name="FileAppender" fileName="${logfileName}">
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</Pattern>
+            </PatternLayout>
         </File>
+
+        <!-- Console appender for ERROR logs only, directed to STDERR -->
+        <Console name="ErrorConsole" target="SYSTEM_ERR">
+            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</Pattern>
+            </PatternLayout>
+        </Console>
     </Appenders>
+
     <Loggers>
-        <Root level="INFO">
-            <AppenderRef ref="File"/>
+        <!-- Root logger sends all logs to the file -->
+        <Root level="ALL">
+            <AppenderRef ref="FileAppender"/>
+            <AppenderRef ref="ErrorConsole"/>
         </Root>
     </Loggers>
 </Configuration>

@@ -13,11 +13,11 @@ import java.util.concurrent.CompletableFuture;
 public class DocumentService implements TextDocumentService {
 
     private final LanguageServer languageServer;
-    Logger logger = LogManager.getLogger();
     private DocumentModel documentModel;
     private ModelConstructorService modelConstructorService;
     private DiagnosticService diagnosticService;
 
+    Logger logger = LogManager.getLogger(getClass());
 
     public DocumentService(LanguageServer languageServer) {
         this.languageServer = languageServer;
@@ -31,6 +31,7 @@ public class DocumentService implements TextDocumentService {
         return TextDocumentService.super.hover(params);
     }
 
+    //TODO i dont think i need this
     @Override
     public CompletableFuture<DocumentDiagnosticReport> diagnostic(DocumentDiagnosticParams params) {
         logger.info("diagnostic");
@@ -41,10 +42,14 @@ public class DocumentService implements TextDocumentService {
     public void didOpen(DidOpenTextDocumentParams didOpenTextDocumentParams) {
         logger.info("didOpen");
         TextDocumentItem textDocumentItem = didOpenTextDocumentParams.getTextDocument();
-        this.documentModel = modelConstructorService.modelConstructor(
-                textDocumentItem.getLanguageId(),
-                textDocumentItem.getUri(),
-                textDocumentItem.getText());
+        try {
+            this.documentModel = modelConstructorService.modelConstructor(
+                    textDocumentItem.getLanguageId(),
+                    textDocumentItem.getUri(),
+                    textDocumentItem.getText());
+        } catch (Exception e) {
+            logger.error("Failed to construct document model on open", e);
+        }
 
         CompletableFuture.runAsync(() -> {
             languageServer.client.publishDiagnostics(
@@ -58,10 +63,14 @@ public class DocumentService implements TextDocumentService {
     public void didChange(DidChangeTextDocumentParams didChangeTextDocumentParams) {
         logger.info("didChange");
         String documentChangeString = didChangeTextDocumentParams.getContentChanges().getFirst().getText();
-        this.documentModel = modelConstructorService.modelConstructor(
-                this.documentModel.lang()
-                ,this.documentModel.documentURI(),
-                documentChangeString);
+        try {
+            this.documentModel = modelConstructorService.modelConstructor(
+                    this.documentModel.lang()
+                    ,this.documentModel.documentURI(),
+                    documentChangeString);
+        } catch (Exception e) {
+            logger.error("Failed to construct document model on change", e);
+        }
 
         CompletableFuture.runAsync(() -> {
             languageServer.client.publishDiagnostics(
@@ -73,11 +82,11 @@ public class DocumentService implements TextDocumentService {
 
     @Override
     public void didClose(DidCloseTextDocumentParams didCloseTextDocumentParams) {
-
+        logger.info("didClose");
     }
 
     @Override
     public void didSave(DidSaveTextDocumentParams didSaveTextDocumentParams) {
-
+        logger.info("didSave");
     }
 }
