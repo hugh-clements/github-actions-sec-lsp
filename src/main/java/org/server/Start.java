@@ -15,7 +15,7 @@ public class Start {
 
     Logger logger = LogManager.getLogger();
 
-    void Main(String[] args) throws ExecutionException, InterruptedException {
+    void main(String[] args) throws ExecutionException, InterruptedException {
         startServer(System.in, System.out);
     }
 

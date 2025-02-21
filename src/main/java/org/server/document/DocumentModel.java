@@ -2,11 +2,7 @@ package org.server.document;
 
 import java.util.List;
 
-public class DocumentModel {
-
-    public DocumentModel() {
-        var test = new Model("testname","run-test", null,null,null, null,null);
-    }
+public record DocumentModel(String lang, String documentURI, org.server.document.DocumentModel.Model model) {
 
     public record Model(
             String name,
@@ -16,19 +12,22 @@ public class DocumentModel {
             List<Job> jobs,
             Secrets.Permissions permission,
             Concurrency concurrency
-    ) {}
+    ) {
+    }
 
     public record OnObject(
             List<Event> event,
             List<WorkflowEvents.WorkflowEvent> workFlowEvent
-    ) {}
+    ) {
+    }
 
     public record Event(
             String event,
             List<Filter> filter,
             List<String> type,
             Schedule schedule
-    ) {}
+    ) {
+    }
 
     public record Filter(
             List<String> tags,
@@ -37,15 +36,18 @@ public class DocumentModel {
             List<String> branchIgnore,
             List<String> paths,
             List<String> pathIgnore
-    ) {}
+    ) {
+    }
 
     public record Schedule(
             List<String> schedules
-    ) {}
+    ) {
+    }
 
     public record Env(
-        List<String> env
-    ) {}
+            List<String> env
+    ) {
+    }
 
     public record Job(
             String id,
@@ -60,7 +62,8 @@ public class DocumentModel {
             List<String> labels,
             String environment,
             Steps steps
-    ) {}
+    ) {
+    }
 
     public enum Runner {
         self_hosted,
@@ -82,14 +85,17 @@ public class DocumentModel {
     public record Concurrency(
             String group,
             Boolean cancelInProgress
-    ) {}
+    ) {
+    }
 
     public record Defaults(
             String shell,
             String workingDirectory
-    ) {}
+    ) {
+    }
 
     public record Steps(
 
-    ) {}
+    ) {
+    }
 }

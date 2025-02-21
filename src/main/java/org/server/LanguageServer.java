@@ -3,10 +3,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.lsp4j.DiagnosticRegistrationOptions;
-import org.eclipse.lsp4j.InitializeParams;
-import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.TextDocumentService;
@@ -31,6 +28,8 @@ public class LanguageServer  implements org.eclipse.lsp4j.services.LanguageServe
         logger.info("Initializing LanguageServer");
         final InitializeResult capabilities = new InitializeResult(new ServerCapabilities());
         //TODO: ensure all required capabilities are present
+        capabilities.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
+        //TODO may need to include a force document sync on open
         capabilities.getCapabilities().setDiagnosticProvider(new DiagnosticRegistrationOptions());
         capabilities.getCapabilities().setHoverProvider(true);
         return CompletableFuture.supplyAsync(() -> capabilities);

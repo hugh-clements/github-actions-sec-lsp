@@ -40,8 +40,11 @@ public class DocumentService implements TextDocumentService {
     @Override
     public void didOpen(DidOpenTextDocumentParams didOpenTextDocumentParams) {
         logger.info("didOpen");
-
-        this.documentModel = modelConstructorService.modelConstructor();
+        TextDocumentItem textDocumentItem = didOpenTextDocumentParams.getTextDocument();
+        this.documentModel = modelConstructorService.modelConstructor(
+                textDocumentItem.getLanguageId(),
+                textDocumentItem.getUri(),
+                textDocumentItem.getText());
 
         CompletableFuture.runAsync(() -> {
             languageServer.client.publishDiagnostics(
@@ -54,8 +57,11 @@ public class DocumentService implements TextDocumentService {
     @Override
     public void didChange(DidChangeTextDocumentParams didChangeTextDocumentParams) {
         logger.info("didChange");
-
-        this.documentModel = modelConstructorService.modelConstructor();
+        String documentChangeString = didChangeTextDocumentParams.getContentChanges().getFirst().getText();
+        this.documentModel = modelConstructorService.modelConstructor(
+                this.documentModel.lang()
+                ,this.documentModel.documentURI(),
+                documentChangeString);
 
         CompletableFuture.runAsync(() -> {
             languageServer.client.publishDiagnostics(
