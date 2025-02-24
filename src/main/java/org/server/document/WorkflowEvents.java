@@ -13,7 +13,7 @@ public class WorkflowEvents {
     public record WorkflowCall(
         Input input,
         Output output,
-        Secrets.Secret secret
+        List<Secrets.Secret> secret
 
     ) {}
 

@@ -13,13 +13,13 @@ import java.util.concurrent.Future;
 
 public class Start {
 
-    Logger logger = LogManager.getLogger(getClass());
+    private static final Logger logger = LogManager.getLogger(Start.class);
 
-    void main(String[] args) throws ExecutionException, InterruptedException {
+    static void main(String[] args) throws ExecutionException, InterruptedException {
         startServer(System.in, System.out);
     }
 
-    private void startServer(InputStream in, OutputStream out) throws ExecutionException, InterruptedException {
+    public static void startServer(InputStream in, OutputStream out) throws ExecutionException, InterruptedException {
         logger.info("Starting server...");
         LanguageServer server = new LanguageServer();
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(server, in, out);

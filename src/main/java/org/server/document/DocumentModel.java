@@ -59,9 +59,41 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             Env env,
             Concurrency concurrency,
             String group,
+            Defaults defaults,
             List<String> labels,
             String environment,
-            Steps steps
+            Container container,
+            Services services,
+            Steps steps,
+            String uses,
+            String with,
+            List<Secrets.Secret> secret,
+            List<String> other
+    ) {
+    }
+
+    public record Services(
+            List<String> services
+    ) {}
+
+    public record Container(
+            List<String> container
+    ) {}
+
+    public record Concurrency(
+            String group,
+            Boolean cancelInProgress
+    ) {
+    }
+
+    public record Defaults(
+            String shell,
+            String workingDirectory
+    ) {
+    }
+
+    public record Steps(
+        List<String> step //TODO may need to detail
     ) {
     }
 
@@ -80,22 +112,5 @@ public record DocumentModel(String lang, String documentURI, org.server.document
         macos_14,
         macos_15,
         macos_latest
-    }
-
-    public record Concurrency(
-            String group,
-            Boolean cancelInProgress
-    ) {
-    }
-
-    public record Defaults(
-            String shell,
-            String workingDirectory
-    ) {
-    }
-
-    public record Steps(
-
-    ) {
     }
 }
