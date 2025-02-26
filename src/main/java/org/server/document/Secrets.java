@@ -1,9 +1,10 @@
 package org.server.document;
 
-import java.util.List;
+import lombok.Builder;
 
 public class Secrets {
 
+    @Builder
     public record Secret(
             String accessToken,
             String description,
@@ -16,6 +17,7 @@ public class Secrets {
         WRITE
     }
 
+    @Builder
     public record Permissions(
             PermissionLevel actions,
             PermissionLevel attestations,
@@ -32,4 +34,5 @@ public class Secrets {
             PermissionLevel securityEvents,
             PermissionLevel statuses
     ) {}
+
 }

@@ -26,7 +26,6 @@ public class ModelConstructorService {
      */
     public DocumentModel modelConstructor(String lang, String documentURI, String text) throws Exception {
         logger.info("Constructing model");
-
         var node = parseYAML(text);
         if (!(node instanceof MappingNode)) {
             logger.warn("Not a mapping node, setting model to null");
@@ -44,35 +43,29 @@ public class ModelConstructorService {
 
     private DocumentModel.Model parseNode(MappingNode node) {
         logger.info("Parsing node into model");
-        String name = null;
-        String runName = null;
-        DocumentModel.OnObject on = null;
-        DocumentModel.Defaults defaults = null;
-        List<DocumentModel.Job> jobs = null;
-        Secrets.Permissions permission = null;
-        DocumentModel.Concurrency concurrency = null;
+        var modelBuilder = DocumentModel.Model.builder();
 
         for (var nodeTuple : node.getValue()) {
             ScalarNode scalar = (ScalarNode) nodeTuple.getKeyNode();
             switch (scalar.getValue()) {
                 case "name":
-                    name = ((ScalarNode) nodeTuple.getKeyNode()).getValue();
+                    modelBuilder.name(((ScalarNode) nodeTuple.getKeyNode()).getValue());
                 case "runName":
-                    runName = ((ScalarNode) nodeTuple.getKeyNode()).getValue();
+                    modelBuilder.runName(((ScalarNode) nodeTuple.getKeyNode()).getValue());
                 case "on":
-                    on = parseOn(nodeTuple.getValueNode());
-                case "defaults": defaults = parseDefaults(nodeTuple.getValueNode());
+                    modelBuilder.on(parseOn(nodeTuple.getValueNode()));
+                case "defaults": modelBuilder.defaults(parseDefaults(nodeTuple.getValueNode()));
                 case "jobs": {
                     assert nodeTuple.getValueNode() instanceof MappingNode;
-                    jobs = parseJobs((MappingNode) nodeTuple.getValueNode());
+                    modelBuilder.jobs(parseJobs((MappingNode) nodeTuple.getValueNode()));
                 }
-                case "permission": permission = parsePermission(nodeTuple.getValueNode());
-                case "concurrency": concurrency = parseConcurrency(nodeTuple.getValueNode());
+                case "permission": modelBuilder.permission(parsePermission(nodeTuple.getValueNode()));
+                case "concurrency": modelBuilder.concurrency(parseConcurrency(nodeTuple.getValueNode()));
                 default:
                     logger.error("Failed to parse NodeTuple");
             }
         }
-        return new DocumentModel.Model(name, runName, on, defaults, jobs, permission, concurrency);
+        return modelBuilder.build();
     }
 
     private DocumentModel.OnObject parseOn(Node onNode) {
@@ -95,36 +88,17 @@ public class ModelConstructorService {
         var jobs = new ArrayList<DocumentModel.Job>();
         jobNode.getValue().forEach(node -> {
             var jobName = ((ScalarNode) node.getKeyNode()).getValue();
-            Secrets.Permissions permissions = null;
-            String condition = null;
-            List<String> needs = null;
-            List<DocumentModel.Runner> runsOn = null;
-            DocumentModel.Env env = null;
-            DocumentModel.Concurrency concurrency = null;
-            String group = null;
-            DocumentModel.Defaults defaults = null;
-            List<String> labels = null;
-            String environment = null;
-            DocumentModel.Container container = null;
-            DocumentModel.Services services = null;
-            DocumentModel.Steps steps = null;
-            String uses = null;
-            String with = null;
-            List<Secrets.Secret> secret = null;
-            List<String> other = null;
-
+            var jobBuilder = DocumentModel.Job.builder();
+            jobBuilder.name(jobName);
 
             var jobDetails = ((MappingNode)node.getValueNode()).getValue();
             for (var jobTuple : jobDetails) {
                 switch (((ScalarNode)jobTuple.getKeyNode()).getValue()) {
-                    case "runs-on": runsOn = parseRunners(jobTuple.getValueNode());
-                    case "steps":
+                    case "runs-on": jobBuilder.runsOn(parseRunners(jobTuple.getValueNode()));
+                    case "steps": jobBuilder.steps();
                 }
             }
-
-
-            var job = new DocumentModel.Job(jobName,permissions,condition,needs,runsOn,env,concurrency,group,defaults,labels,environment,container,services,steps,uses,with,secret,other);
-            jobs.add(job);
+            jobs.add(jobBuilder.build());
         });
 
         return jobs;
@@ -135,12 +109,12 @@ public class ModelConstructorService {
         if (runnerNode instanceof ScalarNode) {
             runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runnerNode).getValue()));
         } else if (runnerNode instanceof SequenceNode) {
-        } else {
             ((SequenceNode) runnerNode).getValue().forEach(runner -> {
 
 
                 runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue()));
             } );
+        } else {
             logger.error("Failed to parse Runners, Node is not SequenceNode or ScalarNode");
         }
         return runners;

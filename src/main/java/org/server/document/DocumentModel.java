@@ -1,9 +1,13 @@
 package org.server.document;
 
+import lombok.Builder;
+import org.yaml.snakeyaml.nodes.Node;
+
 import java.util.List;
 
 public record DocumentModel(String lang, String documentURI, org.server.document.DocumentModel.Model model) {
 
+    @Builder
     public record Model(
             String name,
             String runName,
@@ -15,12 +19,14 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     ) {
     }
 
+    @Builder
     public record OnObject(
             List<Event> event,
             List<WorkflowEvents.WorkflowEvent> workFlowEvent
     ) {
     }
 
+    @Builder
     public record Event(
             String event,
             List<Filter> filter,
@@ -29,6 +35,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     ) {
     }
 
+    @Builder
     public record Filter(
             List<String> tags,
             List<String> tagIgnore,
@@ -49,6 +56,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     ) {
     }
 
+    @Builder
     public record Job(
             String name,
             Secrets.Permissions permissions,
@@ -79,12 +87,14 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             List<String> container
     ) {}
 
+    @Builder
     public record Concurrency(
             String group,
             Boolean cancelInProgress
     ) {
     }
 
+    @Builder
     public record Defaults(
             String shell,
             String workingDirectory
@@ -92,7 +102,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     }
 
     public record Steps(
-        List<String> step //TODO may need to detail
+            List<Node> step //TODO may need to detail
     ) {
     }
 
