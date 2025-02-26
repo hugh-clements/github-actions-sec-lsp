@@ -50,7 +50,6 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     }
 
     public record Job(
-            String id,
             String name,
             Secrets.Permissions permissions,
             String condition,
@@ -111,6 +110,26 @@ public record DocumentModel(String lang, String documentURI, org.server.document
         macos_13,
         macos_14,
         macos_15,
-        macos_latest
+        macos_latest;
+
+        public static Runner toRunner(String stringRunner) {
+            return switch (stringRunner) {
+                case "self_hosted" -> self_hosted;
+                case "ubuntu_latest" -> ubuntu_latest;
+                case "ubuntu_24_04" -> ubuntu_24_04;
+                case "ubuntu_22_04" -> ubuntu_22_04;
+                case "ubuntu_20_04" -> ubuntu_20_04;
+                case "windows_2025" -> windows_2025;
+                case "windows_2022" -> windows_2022;
+                case "windows_2019" -> windows_2019;
+                case "ubuntu_24_04_arm" -> ubuntu_24_04_arm;
+                case "ubuntu_22_04_arm" -> ubuntu_22_04_arm;
+                case "macos_13" -> macos_13;
+                case "macos_14" -> macos_14;
+                case "macos_15" -> macos_15;
+                case "macos_latest" -> macos_latest;
+                default -> throw new IllegalArgumentException("Unknown runner " + stringRunner);
+            };
+        }
     }
 }

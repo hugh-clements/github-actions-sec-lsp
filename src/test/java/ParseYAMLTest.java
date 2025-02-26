@@ -1,6 +1,7 @@
 import org.junit.jupiter.api.Test;
 import org.server.document.ModelConstructorService;
 import org.yaml.snakeyaml.nodes.MappingNode;
+import org.yaml.snakeyaml.nodes.NodeTuple;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +16,6 @@ public class ParseYAMLTest {
         var modelConstructorService = new ModelConstructorService();
         var parsedYAML = modelConstructorService.parseYAML(toParse);
         assert parsedYAML instanceof MappingNode;
-        System.out.println(((MappingNode) parsedYAML).getValue());
+        System.out.println(((MappingNode) ((MappingNode) ((MappingNode) parsedYAML).getValue().get(3).getValueNode()).getValue().getFirst().getValueNode()).getValue());
     }
 }

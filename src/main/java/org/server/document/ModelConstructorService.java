@@ -6,8 +6,10 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
+import org.yaml.snakeyaml.nodes.SequenceNode;
 
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -60,8 +62,11 @@ public class ModelConstructorService {
                 case "on":
                     on = parseOn(nodeTuple.getValueNode());
                 case "defaults": defaults = parseDefaults(nodeTuple.getValueNode());
-                case "jobs": jobs = null;
-                case "permission": permission = null;
+                case "jobs": {
+                    assert nodeTuple.getValueNode() instanceof MappingNode;
+                    jobs = parseJobs((MappingNode) nodeTuple.getValueNode());
+                }
+                case "permission": permission = parsePermission(nodeTuple.getValueNode());
                 case "concurrency": concurrency = parseConcurrency(nodeTuple.getValueNode());
                 default:
                     logger.error("Failed to parse NodeTuple");
@@ -82,8 +87,63 @@ public class ModelConstructorService {
         return new DocumentModel.Concurrency(null,null);
     }
 
-    private DocumentModel.Job parseJob(Node jobNode) {
-        return new DocumentModel.Job(null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null);
+    private Secrets.Permissions parsePermission(Node permissionNode) {
+        return new Secrets.Permissions(null,null,null,null,null,null,null,null,null,null,null,null,null,null);
+    }
+
+    private List<DocumentModel.Job> parseJobs(MappingNode jobNode) {
+        var jobs = new ArrayList<DocumentModel.Job>();
+        jobNode.getValue().forEach(node -> {
+            var jobName = ((ScalarNode) node.getKeyNode()).getValue();
+            Secrets.Permissions permissions = null;
+            String condition = null;
+            List<String> needs = null;
+            List<DocumentModel.Runner> runsOn = null;
+            DocumentModel.Env env = null;
+            DocumentModel.Concurrency concurrency = null;
+            String group = null;
+            DocumentModel.Defaults defaults = null;
+            List<String> labels = null;
+            String environment = null;
+            DocumentModel.Container container = null;
+            DocumentModel.Services services = null;
+            DocumentModel.Steps steps = null;
+            String uses = null;
+            String with = null;
+            List<Secrets.Secret> secret = null;
+            List<String> other = null;
+
+
+            var jobDetails = ((MappingNode)node.getValueNode()).getValue();
+            for (var jobTuple : jobDetails) {
+                switch (((ScalarNode)jobTuple.getKeyNode()).getValue()) {
+                    case "runs-on": runsOn = parseRunners(jobTuple.getValueNode());
+                    case "steps":
+                }
+            }
+
+
+            var job = new DocumentModel.Job(jobName,permissions,condition,needs,runsOn,env,concurrency,group,defaults,labels,environment,container,services,steps,uses,with,secret,other);
+            jobs.add(job);
+        });
+
+        return jobs;
+    }
+
+    private List<DocumentModel.Runner> parseRunners(Node runnerNode) {
+        var runners = new ArrayList<DocumentModel.Runner>();
+        if (runnerNode instanceof ScalarNode) {
+            runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runnerNode).getValue()));
+        } else if (runnerNode instanceof SequenceNode) {
+        } else {
+            ((SequenceNode) runnerNode).getValue().forEach(runner -> {
+
+
+                runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue()));
+            } );
+            logger.error("Failed to parse Runners, Node is not SequenceNode or ScalarNode");
+        }
+        return runners;
     }
 
     private DocumentModel.Defaults parseDefaults(Node defaultsNode) {
