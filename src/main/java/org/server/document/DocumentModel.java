@@ -2,10 +2,12 @@ package org.server.document;
 
 import lombok.Builder;
 import org.yaml.snakeyaml.nodes.Node;
-
 import java.util.List;
+import java.util.Map;
 
 public record DocumentModel(String lang, String documentURI, org.server.document.DocumentModel.Model model) {
+
+    //TODO CHECK IT ALL AGAIN AKFNJLAEFNLJAHFLIANFJLKAFHkANFEkl
 
     @Builder
     public record Model(
@@ -31,7 +33,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             String event,
             List<Filter> filter,
             List<String> type,
-            Schedule schedule
+            List<String> schedule
     ) {
     }
 
@@ -46,24 +48,14 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     ) {
     }
 
-    public record Schedule(
-            List<String> schedules
-    ) {
-    }
-
-    public record Env(
-            List<String> env
-    ) {
-    }
-
     @Builder
     public record Job(
             String name,
             Secrets.Permissions permissions,
-            String condition,
+            Node condition,
             List<String> needs,
             List<Runner> runsOn,
-            Env env,
+            Map<String, String> env,
             Concurrency concurrency,
             String group,
             Defaults defaults,
