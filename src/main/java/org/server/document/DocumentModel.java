@@ -71,7 +71,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             String environment,
             Container container,
             Services services,
-            Steps steps,
+            List<Node> steps,
             String uses,
             String with,
             List<Secrets.Secret> secret,
@@ -98,11 +98,6 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     public record Defaults(
             String shell,
             String workingDirectory
-    ) {
-    }
-
-    public record Steps(
-            List<Node> step //TODO may need to detail
     ) {
     }
 

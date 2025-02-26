@@ -10,7 +10,9 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class that contains the DocumentModel constructor method
@@ -45,7 +47,7 @@ public class ModelConstructorService {
         logger.info("Parsing node into model");
         var modelBuilder = DocumentModel.Model.builder();
 
-        for (var nodeTuple : node.getValue()) {
+        for (var nodeTuple : node.getValue()) { //TODO: Make this like the other function with the josh map cringe
             ScalarNode scalar = (ScalarNode) nodeTuple.getKeyNode();
             switch (scalar.getValue()) {
                 case "name":
@@ -86,22 +88,44 @@ public class ModelConstructorService {
 
     private List<DocumentModel.Job> parseJobs(MappingNode jobNode) {
         var jobs = new ArrayList<DocumentModel.Job>();
-        jobNode.getValue().forEach(node -> {
-            var jobName = ((ScalarNode) node.getKeyNode()).getValue();
+        mappingToMap(jobNode).forEach((jobName, node) -> {
             var jobBuilder = DocumentModel.Job.builder();
             jobBuilder.name(jobName);
-
-            var jobDetails = ((MappingNode)node.getValueNode()).getValue();
-            for (var jobTuple : jobDetails) {
-                switch (((ScalarNode)jobTuple.getKeyNode()).getValue()) {
-                    case "runs-on": jobBuilder.runsOn(parseRunners(jobTuple.getValueNode()));
-                    case "steps": jobBuilder.steps();
+            var jobDetails = mappingToMap((MappingNode) node);
+            jobDetails.forEach((key, value) -> {
+                switch (key) {
+                    case "permissions":
+                        jobBuilder.permissions(parsePermissions(value));
+                    case "condition":
+                    case "needs":
+                    case "runs-on":
+                        jobBuilder.runsOn(parseRunners(value));
+                    case "env":
+                    case "concurrency":
+                    case "group":
+                    case "defaults":
+                    case "labels":
+                    case "environment":
+                    case "container":
+                    case "services":
+                    case "steps":
+                        jobBuilder.steps(((SequenceNode) value).getValue());
+                    case "uses":
+                    case "with":
+                    case "secret":
+                    default:
                 }
-            }
+            });
             jobs.add(jobBuilder.build());
         });
-
         return jobs;
+    }
+
+    private Secrets.Permissions parsePermissions(Node runnersNode) {
+        var permissionBuilder = Secrets.Permissions.builder();
+
+
+        return permissionBuilder.build();
     }
 
     private List<DocumentModel.Runner> parseRunners(Node runnerNode) {
@@ -110,8 +134,6 @@ public class ModelConstructorService {
             runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runnerNode).getValue()));
         } else if (runnerNode instanceof SequenceNode) {
             ((SequenceNode) runnerNode).getValue().forEach(runner -> {
-
-
                 runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue()));
             } );
         } else {
@@ -123,4 +145,21 @@ public class ModelConstructorService {
     private DocumentModel.Defaults parseDefaults(Node defaultsNode) {
         return new DocumentModel.Defaults(null,null);
     }
+
+    private String parseToString(ScalarNode node) {
+        return node.getValue();
+    }
+
+    private List<String> parseToStringList(SequenceNode node) {
+        return node.getValue().stream().map( n -> parseToString((ScalarNode) n)).toList();
+    }
+
+    private Map<String, Node> mappingToMap(MappingNode mappingNode) {
+        var newMap = new HashMap<String, Node>();
+        mappingNode.getValue().forEach(node -> {
+            newMap.put(((ScalarNode)node.getKeyNode()).getValue(), node.getKeyNode());
+        });
+        return newMap;
+    }
+
 }
