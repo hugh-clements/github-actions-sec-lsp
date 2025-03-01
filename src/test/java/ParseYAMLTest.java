@@ -11,11 +11,20 @@ import java.nio.file.Path;
 public class ParseYAMLTest {
 
     @Test
-    public void testParseYAML() throws IOException {
+    public void testParseYAML1() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/test1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsedYAML = modelConstructorService.parseYAML(toParse);
         assert parsedYAML instanceof MappingNode;
         System.out.println(((MappingNode) ((MappingNode) ((MappingNode) parsedYAML).getValue().get(3).getValueNode()).getValue().getFirst().getValueNode()).getValue());
+    }
+
+    @Test
+    public void testParseYAML2() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/test2.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsedYAML = modelConstructorService.parseYAML(toParse);
+        assert parsedYAML instanceof MappingNode;
+        System.out.println(parsedYAML);
     }
 }

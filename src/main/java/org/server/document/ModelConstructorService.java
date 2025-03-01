@@ -106,19 +106,19 @@ public class ModelConstructorService {
                     case "env" -> {
                         jobBuilder.env(parseToStringMap((MappingNode) value));
                     }
-                    case "concurrency" -> {}
-                    case "group" -> {}
-                    case "defaults" -> {}
-                    case "labels" -> {}
-                    case "environment" -> {}
-                    case "container" -> {}
-                    case "services" -> {}
+                    case "concurrency" -> jobBuilder.concurrency(parseConcurrency(value));
+                    case "group" -> jobBuilder.group(parseToString((ScalarNode) value));
+                    case "defaults" -> jobBuilder.defaults(parseDefaults(value));
+                    case "labels" -> jobBuilder.labels(parseToStringList((SequenceNode) value));
+                    case "environment" -> jobBuilder.environment(parseToString((ScalarNode) value));
+                    case "container" -> jobBuilder.container(null); //TODO make method to get Node structure
+                    case "services" -> jobBuilder.services(null);
                     case "steps" ->
                         jobBuilder.steps(((SequenceNode) value).getValue());
-                    case "uses" -> {}
-                    case "with" -> {}
-                    case "secret" -> {}
-                    default -> {}
+                    case "uses" -> jobBuilder.uses(parseToString((ScalarNode) value));
+                    case "with" -> jobBuilder.with(parseToString((ScalarNode) value));
+                    case "secret" -> jobBuilder.secret(parseSecret(value));
+                    default -> jobBuilder.other(null);
                 }
             });
             jobs.add(jobBuilder.build());
@@ -126,10 +126,15 @@ public class ModelConstructorService {
         return jobs;
     }
 
-    /** Parse the "on" keyword */
-    private Secrets.Permissions parsePermissions(Node runnersNode) {
+    /** Parse the "permissions" keyword */
+    private Secrets.Permissions parsePermissions(Node permissionNode) {
         var permissionBuilder = Secrets.Permissions.builder();
-
+        switch (permissionNode) {
+            case ScalarNode s -> {}
+            case SequenceNode s -> {}
+            case MappingNode m -> {}
+            default -> logger.error("Failed to parse PermissionNode");
+        }
 
         return permissionBuilder.build();
     }
@@ -150,6 +155,12 @@ public class ModelConstructorService {
     /** Parse the "defaults" keyword */
     private DocumentModel.Defaults parseDefaults(Node defaultsNode) {
         return new DocumentModel.Defaults(null,null);
+    }
+
+    /** Parse the "secrets" keyword */
+    private List<Secrets.Secret> parseSecret(Node secretNode) {
+        var secrets = new ArrayList<Secrets.Secret>();
+        return secrets;
     }
 
     /**
@@ -181,10 +192,20 @@ public class ModelConstructorService {
         return newMap;
     }
 
+    /**
+     * Helper method to convert nodes to a Map object
+     * @param mappingNode object that has a String key and value
+     * @return Map<String, String>
+     */
     private Map<String, String> parseToStringMap(MappingNode mappingNode) {
         var newMap = new HashMap<String, String>();
         mappingNode.getValue().forEach(node -> newMap.put(parseToString((ScalarNode) node.getKeyNode()),parseToString((ScalarNode) node.getValueNode())));
         return newMap;
+    }
+
+
+    private void parseRemainingNodes(Node node) {
+        //TODO method body
     }
 
 }

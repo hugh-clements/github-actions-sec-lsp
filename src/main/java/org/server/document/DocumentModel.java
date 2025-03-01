@@ -61,8 +61,8 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             Defaults defaults,
             List<String> labels,
             String environment,
-            Container container,
-            Services services,
+            List<Node> container,
+            List<Node> services,
             List<Node> steps,
             String uses,
             String with,
@@ -70,14 +70,6 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             List<String> other
     ) {
     }
-
-    public record Services(
-            List<String> services
-    ) {}
-
-    public record Container(
-            List<String> container
-    ) {}
 
     @Builder
     public record Concurrency(
