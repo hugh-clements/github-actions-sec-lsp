@@ -21,7 +21,7 @@ public class ModelConstructorService {
      * Method that parses YAML and then constructs a DocumentModel
      * @return new Document model reflecting the current document in the client
      */
-    public DocumentModel modelConstructor(String lang, String documentURI, String text) {
+    public DocumentModel modelConstructor(String lang, String documentURI, String text) throws Exception {
         logger.info("Constructing model");
         var node = parseYAML(text);
         if (!(node instanceof MappingNode)) {
@@ -51,7 +51,6 @@ public class ModelConstructorService {
     private DocumentModel.Model parseNode(MappingNode mappingNode) {
         logger.info("Parsing node into model");
         var modelBuilder = DocumentModel.Model.builder();
-
         mappingToMap(mappingNode).forEach( (nodeTuple, value) -> {
             switch (nodeTuple) {
                 case "name" ->
@@ -60,10 +59,10 @@ public class ModelConstructorService {
                     modelBuilder.runName(parseToString((ScalarNode) value));
                 case "on" ->
                     modelBuilder.on(parseOn(value));
-                case "defaults" -> modelBuilder.defaults(parseDefaults(value));
+                case "defaults" -> modelBuilder.defaults(parseDefaults((MappingNode) value));
                 case "jobs" ->
                     modelBuilder.jobs(parseJobs((MappingNode) value));
-                case "permission" -> modelBuilder.permission(parsePermissions(value));
+                case "permissions" -> modelBuilder.permissions(parsePermissions(value));
                 case "concurrency" -> modelBuilder.concurrency(parseConcurrency(value));
                 default ->
                     logger.error("Failed to parse NodeTuple");
@@ -108,17 +107,16 @@ public class ModelConstructorService {
                     }
                     case "concurrency" -> jobBuilder.concurrency(parseConcurrency(value));
                     case "group" -> jobBuilder.group(parseToString((ScalarNode) value));
-                    case "defaults" -> jobBuilder.defaults(parseDefaults(value));
+                    case "defaults" -> jobBuilder.defaults(parseDefaults((MappingNode) value));
                     case "labels" -> jobBuilder.labels(parseToStringList((SequenceNode) value));
                     case "environment" -> jobBuilder.environment(parseToString((ScalarNode) value));
-                    case "container" -> jobBuilder.container(null); //TODO make method to get Node structure
-                    case "services" -> jobBuilder.services(null);
-                    case "steps" ->
-                        jobBuilder.steps(((SequenceNode) value).getValue());
+                    case "container" -> jobBuilder.container(value);
+                    case "services" -> jobBuilder.services(value);
+                    case "steps" -> jobBuilder.steps(((SequenceNode) value).getValue());
                     case "uses" -> jobBuilder.uses(parseToString((ScalarNode) value));
                     case "with" -> jobBuilder.with(parseToString((ScalarNode) value));
                     case "secret" -> jobBuilder.secret(parseSecret(value));
-                    default -> jobBuilder.other(null);
+                    default -> jobBuilder.other(value);
                 }
             });
             jobs.add(jobBuilder.build());
@@ -127,16 +125,44 @@ public class ModelConstructorService {
     }
 
     /** Parse the "permissions" keyword */
-    private Secrets.Permissions parsePermissions(Node permissionNode) {
-        var permissionBuilder = Secrets.Permissions.builder();
+    private Map<Secrets.PermissionType, Secrets.PermissionLevel> parsePermissions(Node permissionNode) {
         switch (permissionNode) {
-            case ScalarNode s -> {}
-            case SequenceNode s -> {}
-            case MappingNode m -> {}
-            default -> logger.error("Failed to parse PermissionNode");
+            case ScalarNode s -> {
+                return parseScalarPermissions(s.getValue());
+            }
+            case MappingNode m -> {
+                return parseMappingPermissions(m);
+            }
+            default -> throw new IllegalArgumentException("Unexpected Node type when parsing permissions");
         }
+    }
 
-        return permissionBuilder.build();
+    public Map<Secrets.PermissionType, Secrets.PermissionLevel> parseScalarPermissions(String permissionLevel) {
+        var level = switch (permissionLevel) {
+            case "read-all" -> Secrets.PermissionLevel.READ;
+            case "write-all" -> Secrets.PermissionLevel.WRITE;
+            case "{}" -> Secrets.PermissionLevel.NONE;
+            default -> throw new IllegalArgumentException("Failed to parse permissions inside ScalarNode");
+        };
+        var map = new HashMap<Secrets.PermissionType,Secrets.PermissionLevel>();
+        for (var value : Secrets.PermissionType.values()) {
+            map.put(value, level);
+        }
+        return map;
+    }
+
+    public Map<Secrets.PermissionType, Secrets.PermissionLevel> parseMappingPermissions(MappingNode mappingNode) {
+        var map = new HashMap<Secrets.PermissionType,Secrets.PermissionLevel>();
+        mappingNode.getValue().forEach((node) -> {
+            var level = switch (((ScalarNode)node.getValueNode()).getValue()) {
+                case "read-all" -> Secrets.PermissionLevel.READ;
+                case "write-all" -> Secrets.PermissionLevel.WRITE;
+                case "{}" -> Secrets.PermissionLevel.NONE;
+                default -> throw new IllegalStateException("Failed to parse permissionLevel inside MappingNode");
+            };
+            map.put(Secrets.PermissionType.stringToPermissionType(((ScalarNode) node.getKeyNode()).getValue()),level);
+        });
+        return map;
     }
 
     /** Parse the "runner" keyword */
@@ -153,8 +179,11 @@ public class ModelConstructorService {
     }
 
     /** Parse the "defaults" keyword */
-    private DocumentModel.Defaults parseDefaults(Node defaultsNode) {
-        return new DocumentModel.Defaults(null,null);
+    private DocumentModel.Defaults parseDefaults(MappingNode defaultsNode) {
+        var tupleList = ((MappingNode) defaultsNode.getValue().getFirst().getValueNode()).getValue();
+        var shell = ((ScalarNode) tupleList.getFirst().getValueNode()).getValue();
+        var working_dir = ((ScalarNode) tupleList.getLast().getValueNode()).getValue();
+        return new DocumentModel.Defaults(shell,working_dir);
     }
 
     /** Parse the "secrets" keyword */
@@ -202,10 +231,4 @@ public class ModelConstructorService {
         mappingNode.getValue().forEach(node -> newMap.put(parseToString((ScalarNode) node.getKeyNode()),parseToString((ScalarNode) node.getValueNode())));
         return newMap;
     }
-
-
-    private void parseRemainingNodes(Node node) {
-        //TODO method body
-    }
-
 }

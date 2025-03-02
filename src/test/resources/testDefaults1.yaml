@@ -1,0 +1,25 @@
+name: Example Workflow
+on: [push, pull_request]
+defaults:
+  run:
+    shell: bash
+    working-directory: ./src
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests
+        run: npm test
+  job1:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./scripts
+      steps:
+        - name: test123
+          run: npm install

@@ -16,7 +16,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             OnObject on,
             Defaults defaults,
             List<Job> jobs,
-            Secrets.Permissions permission,
+            Map<Secrets.PermissionType, Secrets.PermissionLevel> permissions,
             Concurrency concurrency
     ) {
     }
@@ -51,7 +51,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     @Builder
     public record Job(
             String name,
-            Secrets.Permissions permissions,
+            Map<Secrets.PermissionType, Secrets.PermissionLevel> permissions,
             Node condition,
             List<String> needs,
             List<Runner> runsOn,
@@ -61,13 +61,13 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             Defaults defaults,
             List<String> labels,
             String environment,
-            List<Node> container,
-            List<Node> services,
+            Node container,
+            Node services,
             List<Node> steps,
             String uses,
             String with,
             List<Secrets.Secret> secret,
-            List<String> other
+            Node other
     ) {
     }
 
