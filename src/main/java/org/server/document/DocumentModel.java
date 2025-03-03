@@ -1,11 +1,15 @@
 package org.server.document;
 
 import lombok.Builder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.nodes.Node;
 import java.util.List;
 import java.util.Map;
 
 public record DocumentModel(String lang, String documentURI, org.server.document.DocumentModel.Model model) {
+
+    static Logger logger = LogManager.getLogger(DocumentModel.class);
 
     @Builder
     public record Model(
@@ -104,21 +108,24 @@ public record DocumentModel(String lang, String documentURI, org.server.document
 
         public static Runner toRunner(String stringRunner) {
             return switch (stringRunner) {
-                case "self_hosted" -> self_hosted;
-                case "ubuntu_latest" -> ubuntu_latest;
-                case "ubuntu_24_04" -> ubuntu_24_04;
-                case "ubuntu_22_04" -> ubuntu_22_04;
+                case "self-hosted" -> self_hosted;
+                case "ubuntu-latest" -> ubuntu_latest;
+                case "ubuntu-24-04" -> ubuntu_24_04;
+                case "ubuntu-22-04" -> ubuntu_22_04;
                 case "ubuntu_20_04" -> ubuntu_20_04;
-                case "windows_2025" -> windows_2025;
-                case "windows_2022" -> windows_2022;
-                case "windows_2019" -> windows_2019;
-                case "ubuntu_24_04_arm" -> ubuntu_24_04_arm;
-                case "ubuntu_22_04_arm" -> ubuntu_22_04_arm;
-                case "macos_13" -> macos_13;
-                case "macos_14" -> macos_14;
-                case "macos_15" -> macos_15;
-                case "macos_latest" -> macos_latest;
-                default -> throw new IllegalArgumentException("Unknown runner " + stringRunner);
+                case "windows-2025" -> windows_2025;
+                case "windows-2022" -> windows_2022;
+                case "windows-2019" -> windows_2019;
+                case "ubuntu-24-04-arm" -> ubuntu_24_04_arm;
+                case "ubuntu-22-04-arm" -> ubuntu_22_04_arm;
+                case "macos-13" -> macos_13;
+                case "macos-14" -> macos_14;
+                case "macos-15" -> macos_15;
+                case "macos-latest" -> macos_latest;
+                default -> {
+                    logger.info(stringRunner);
+                    throw new IllegalArgumentException("Unsupported Runner: " + stringRunner);
+                }
             };
         }
     }

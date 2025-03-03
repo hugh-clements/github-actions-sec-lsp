@@ -1,0 +1,14 @@
+name: test concurrency
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  steps:
+    - name: blank
+      uses: "this"

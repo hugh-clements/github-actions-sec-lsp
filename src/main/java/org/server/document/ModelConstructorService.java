@@ -51,29 +51,28 @@ public class ModelConstructorService {
     private DocumentModel.Model parseNode(MappingNode mappingNode) {
         logger.info("Parsing node into model");
         var modelBuilder = DocumentModel.Model.builder();
-        mappingToMap(mappingNode).forEach( (nodeTuple, value) -> {
-            switch (nodeTuple) {
+        mappingToMap(mappingNode).forEach( (string, value) -> {
+            switch (string) {
                 case "name" ->
                     modelBuilder.name(parseToString((ScalarNode) value));
-                case "runName" ->
+                case "run-name" ->
                     modelBuilder.runName(parseToString((ScalarNode) value));
                 case "on" ->
-                    modelBuilder.on(parseOn((MappingNode) value));
+                    modelBuilder.on(parseOn(value));
                 case "defaults" -> modelBuilder.defaults(parseDefaults((MappingNode) value));
-                case "jobs" ->
-                    modelBuilder.jobs(parseJobs((MappingNode) value));
+                case "jobs" -> modelBuilder.jobs(parseJobs((MappingNode) value));
                 case "permissions" -> modelBuilder.permissions(parsePermissions(value));
-                case "concurrency" -> modelBuilder.concurrency(parseConcurrency(value));
+                case "concurrency" -> modelBuilder.concurrency(parseConcurrency((MappingNode) value));
                 default ->
-                    logger.error("Failed to parse NodeTuple");
+                    logger.error("Failed to parse NodeTuple: " + string);
             }
         });
         return modelBuilder.build();
     }
 
     /** Parse the "on" keyword */
-    private DocumentModel.OnObject parseOn(MappingNode onNode) {
-        return switch (onNode.getValue()) {
+    private DocumentModel.OnObject parseOn(Node onNode) {
+        return switch (onNode) {
             case ScalarNode s -> new DocumentModel.OnObject(parseSimpleEvent(s),null);
             case SequenceNode sq -> new DocumentModel.OnObject(parseSimpleEventSequence(sq),null);
             case MappingNode m -> parseEventMapping(m);
@@ -126,8 +125,8 @@ public class ModelConstructorService {
                 var runBuilder = WorkflowEvents.WorkflowRun.builder();
                 mappingToMap(getSingletonMapValue(eventNode)).forEach( (s,n) -> {
                     switch (s) {
-                        case "workflows" -> runBuilder.workflows(getStringFromSequenceOrScalar((SequenceNode) n));
-                        case "types" -> runBuilder.types(getStringFromSequenceOrScalar((SequenceNode) n));
+                        case "workflows" -> runBuilder.workflows(getStringFromSequenceOrScalar(n));
+                        case "types" -> runBuilder.types(getStringFromSequenceOrScalar(n));
                         case "branches" -> runBuilder.branches(n);
                         case "branches-ignore" -> runBuilder.branchesIgnore(n);
                     }
@@ -165,9 +164,15 @@ public class ModelConstructorService {
     }
 
     /** Parse the "concurrency" keyword */
-    private DocumentModel.Concurrency parseConcurrency(Node concurrencyNode) {
-        //TODO
-        return new DocumentModel.Concurrency(null,null);
+    private DocumentModel.Concurrency parseConcurrency(MappingNode concurrencyNode) {
+        var builder = DocumentModel.Concurrency.builder();
+        mappingToMap(concurrencyNode).forEach( (s, n) -> {
+           switch (s) {
+               case "group" -> builder.group(((ScalarNode)n).getValue());
+               case "cancel-in-progress" -> builder.cancelInProgress(Boolean.parseBoolean(((ScalarNode)n).getValue()));
+           }
+        });
+        return builder.build();
     }
 
     /** Parse the "jobs" keyword */
@@ -188,7 +193,7 @@ public class ModelConstructorService {
                     }
                     case "runs-on" -> jobBuilder.runsOn(parseRunners(value));
                     case "env" -> jobBuilder.env(parseToStringMap((MappingNode) value));
-                    case "concurrency" -> jobBuilder.concurrency(parseConcurrency(value));
+                    case "concurrency" -> jobBuilder.concurrency(parseConcurrency((MappingNode) value));
                     case "group" -> jobBuilder.group(parseToString((ScalarNode) value));
                     case "defaults" -> jobBuilder.defaults(parseDefaults((MappingNode) value));
                     case "labels" -> jobBuilder.labels(parseToStringList((SequenceNode) value));
@@ -256,7 +261,8 @@ public class ModelConstructorService {
         } else if (runnerNode instanceof SequenceNode) {
             ((SequenceNode) runnerNode).getValue().forEach(runner -> runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue())));
         } else {
-           throw new IllegalArgumentException("Failed to parse Runners, Node is not SequenceNode or ScalarNode");
+            System.err.println("Failed Node: " + runnerNode);
+            throw new IllegalArgumentException("Failed to parse Runners, Node is not SequenceNode or ScalarNode");
         }
         return runners;
     }
@@ -310,7 +316,7 @@ public class ModelConstructorService {
      */
     private Map<String, Node> mappingToMap(MappingNode mappingNode) {
         var newMap = new HashMap<String, Node>();
-        mappingNode.getValue().forEach(node -> newMap.put(((ScalarNode)node.getKeyNode()).getValue(), node.getKeyNode()));
+        mappingNode.getValue().forEach(node -> newMap.put(((ScalarNode)node.getKeyNode()).getValue(), node.getValueNode()));
         return newMap;
     }
 
@@ -336,9 +342,7 @@ public class ModelConstructorService {
     private List<String> getStringFromSequenceOrScalar(Node node) {
         var list = new ArrayList<String>();
         if (node instanceof SequenceNode) {
-            ((SequenceNode)node).getValue().forEach(n -> {
-                list.add(((ScalarNode) n).getValue());
-            });
+            ((SequenceNode)node).getValue().forEach(n -> list.add(((ScalarNode) n).getValue()));
         } else if (node instanceof ScalarNode) {
             list.add(((ScalarNode) node).getValue());
         }
