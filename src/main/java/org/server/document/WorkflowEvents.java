@@ -1,8 +1,10 @@
 package org.server.document;
 
 import lombok.Builder;
+import org.yaml.snakeyaml.nodes.Node;
 
 import java.util.List;
+import java.util.Map;
 
 public class WorkflowEvents {
 
@@ -15,30 +17,23 @@ public class WorkflowEvents {
 
     @Builder
     public record WorkflowCall(
-        Input input,
-        Output output,
-        List<Secrets.Secret> secret
+        Node input,
+        Node output,
+        Map<String,Secrets.Secret> secrets
 
-    ) {}
-
-    public record Input(
-            List<String> inputs
-    ) {}
-    public record Output(
-            List<String> outputs
     ) {}
 
     @Builder
     public record WorkflowRun(
-            List<String> type,
-            List<String> branch,
-            List<String> branchIgnore,
-            List<String> workflow
+            List<String> workflows,
+            List<String> types,
+            Node branches,
+            Node branchesIgnore
     ) {}
 
     @Builder
     public record WorkflowDispatch(
-        Input input,
-        Output output
+        Node input,
+        Node output
     ) {}
 }

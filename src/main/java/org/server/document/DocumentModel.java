@@ -7,8 +7,6 @@ import java.util.Map;
 
 public record DocumentModel(String lang, String documentURI, org.server.document.DocumentModel.Model model) {
 
-    //TODO CHECK IT ALL AGAIN AKFNJLAEFNLJAHFLIANFJLKAFHkANFEkl
-
     @Builder
     public record Model(
             String name,
@@ -30,13 +28,16 @@ public record DocumentModel(String lang, String documentURI, org.server.document
 
     @Builder
     public record Event(
-            String event,
-            List<Filter> filter,
+            String eventName,
+            Node filter,
             List<String> type,
-            List<String> schedule
+            Node schedule,
+            String condition,
+            Node milestone
     ) {
     }
 
+    /* RFU
     @Builder
     public record Filter(
             List<String> tags,
@@ -46,13 +47,13 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             List<String> paths,
             List<String> pathIgnore
     ) {
-    }
+    } */
 
     @Builder
     public record Job(
             String name,
             Map<Secrets.PermissionType, Secrets.PermissionLevel> permissions,
-            Node condition,
+            String condition,
             List<String> needs,
             List<Runner> runsOn,
             Map<String, String> env,
@@ -66,7 +67,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             List<Node> steps,
             String uses,
             String with,
-            List<Secrets.Secret> secret,
+            Map<String,Secrets.Secret> secret,
             Node other
     ) {
     }

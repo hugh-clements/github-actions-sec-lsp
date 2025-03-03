@@ -56,8 +56,8 @@ public class ParseYAMLTest {
         var modelConstructorService = new ModelConstructorService();
         var parsedYAML = modelConstructorService.parseYAML(toParse);
         System.out.println(((MappingNode) parsedYAML).getValue().get(2).getValueNode());
-        //System.out.println(((MappingNode) ((MappingNode) parsedYAML).getValue().get(2).getValueNode()).getValue().getFirst().getValueNode());
-        //System.out.println(((MappingNode) ((MappingNode) ((MappingNode) parsedYAML).getValue().get(2).getValueNode()).getValue().getFirst().getValueNode()).getValue());
+        System.out.println(((MappingNode) ((MappingNode) parsedYAML).getValue().get(2).getValueNode()).getValue().getFirst().getValueNode());
+        System.out.println(((MappingNode) ((MappingNode) ((MappingNode) parsedYAML).getValue().get(2).getValueNode()).getValue().getFirst().getValueNode()).getValue());
     }
 
     @Test
@@ -66,6 +66,16 @@ public class ParseYAMLTest {
         var modelConstructorService = new ModelConstructorService();
         var parsedYAML = modelConstructorService.parseYAML(toParse);
         System.out.println(((MappingNode) ((MappingNode) parsedYAML).getValue().get(2).getValueNode()).getValue().getFirst());
+    }
+
+
+
+    @Test
+    public void testParseYAML9() throws Exception {
+        String toParse = Files.readString(Path.of("src/test/resources/testWorkflowEvents1.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsedYAML = modelConstructorService.parseYAML(toParse);
+        System.out.println(((MappingNode) ((MappingNode) parsedYAML).getValue().get(1).getValueNode()).getValue());
     }
 
 }
