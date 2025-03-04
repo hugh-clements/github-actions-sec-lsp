@@ -10,6 +10,9 @@ import org.server.document.ModelConstructorService;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Implementation of TextDocumentService that is responsible for Document sync
+ */
 public class DocumentService implements TextDocumentService {
 
     private final LanguageServer languageServer;

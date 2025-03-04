@@ -1,13 +1,5 @@
-import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
 import org.junit.jupiter.api.Test;
 import org.server.document.ModelConstructorService;
-import org.yaml.snakeyaml.nodes.MappingNode;
-import org.yaml.snakeyaml.nodes.Node;
-import org.yaml.snakeyaml.nodes.ScalarNode;
-import org.yaml.snakeyaml.nodes.SequenceNode;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,22 +11,89 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/test1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-
-        /** Used to pretty print the DocumentModel**/
-        System.out.println(new GsonBuilder().registerTypeAdapter(Node.class, new TypeAdapter<Node>() {
-            @Override
-            public void write(JsonWriter jsonWriter, Node node) throws IOException {
-                switch (node) {
-                    case ScalarNode s -> jsonWriter.value("Node: " + s.getValue());
-                    case SequenceNode sq -> jsonWriter.value("Node: " + sq.getValue());
-                    case MappingNode m -> jsonWriter.value("Node: " + m.getValue());
-                    case null, default -> jsonWriter.nullValue();
-                }
-            }
-            @Override
-            public Node read(JsonReader jsonReader) throws IOException {
-                return null;
-            }
-        }).setPrettyPrinting().create().toJson(parsed));
+        Utils.prettyPrint(parsed);
     }
+
+    @Test
+    public void testNodeParser2() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/test2.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
+    public void testNodeParserConcurrency1() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testConcurrency1.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
+    public void testNodeParserDefaults1() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testDefaults1.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
+    public void testNodeParserEvents1() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testEvents1.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
+    public void testNodeParserEvents2() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testEvents2.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
+    public void testNodeParserPermissions1() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testPermissions1.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
+    public void testNodeParserPermissions2() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testPermissions2.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
+    public void testNodeParserPermissions3() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testPermissions3.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
+    public void testNodeParserSecrets1() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testSecrets1.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
+    public void testNodeParserWorkflowEvents1() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testWorkflowEvents1.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+
+
 }

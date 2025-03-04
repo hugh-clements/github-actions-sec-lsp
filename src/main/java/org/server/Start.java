@@ -11,6 +11,9 @@ import java.io.OutputStream;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+/**
+ * Class used to start the Language Server
+ */
 public class Start {
 
     private static final Logger logger = LogManager.getLogger(Start.class);

@@ -1,12 +1,19 @@
 package org.server.document;
 
 import lombok.Builder;
+import lombok.Singular;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.nodes.Node;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Data Structure that represents the client file state
+ * @param lang document language
+ * @param documentURI document path
+ * @param model Data structure that represents the YAML document structure
+ */
 public record DocumentModel(String lang, String documentURI, org.server.document.DocumentModel.Model model) {
 
     static Logger logger = LogManager.getLogger(DocumentModel.class);
@@ -33,7 +40,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     @Builder
     public record Event(
             String eventName,
-            Node filter,
+            @Singular List<Node> filters,
             List<String> type,
             Node schedule,
             String condition,

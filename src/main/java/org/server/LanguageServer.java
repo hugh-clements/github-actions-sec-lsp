@@ -9,6 +9,9 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Language Server implementation class that is started by Start
+ */
 public class LanguageServer  implements org.eclipse.lsp4j.services.LanguageServer, LanguageClientAware {
 
     Logger logger = LogManager.getLogger(getClass());

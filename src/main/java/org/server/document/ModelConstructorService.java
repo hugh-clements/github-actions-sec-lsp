@@ -11,7 +11,7 @@ import java.io.StringReader;
 import java.util.*;
 
 /**
- * Class that contains the DocumentModel constructor method
+ * Service that constructs a new DocumentModel to reflect the client state
  */
 public class ModelConstructorService {
 
@@ -63,14 +63,13 @@ public class ModelConstructorService {
                 case "jobs" -> modelBuilder.jobs(parseJobs((MappingNode) value));
                 case "permissions" -> modelBuilder.permissions(parsePermissions(value));
                 case "concurrency" -> modelBuilder.concurrency(parseConcurrency((MappingNode) value));
-                default ->
-                    logger.error("Failed to parse NodeTuple: " + string);
+                default -> logger.error("Failed to parse NodeTuple: {}", string);
             }
         });
         return modelBuilder.build();
     }
 
-    /** Parse the "on" keyword */
+    /** Parsing the "on" keyword */
     private DocumentModel.OnObject parseOn(Node onNode) {
         return switch (onNode) {
             case ScalarNode s -> new DocumentModel.OnObject(parseSimpleEvent(s),null);
@@ -80,7 +79,9 @@ public class ModelConstructorService {
         };
     }
 
+    /** Parsing Mapping of Events **/
     public DocumentModel.OnObject parseEventMapping(MappingNode eventMappingNode) {
+        logger.info("Parsing Event mapping");
         List<DocumentModel.Event> events = new ArrayList<>();
         List<WorkflowEvents.WorkflowEvent> workflowEvents = new ArrayList<>();
         mappingToMap(eventMappingNode).forEach((s, n) -> {
@@ -92,10 +93,19 @@ public class ModelConstructorService {
         return new DocumentModel.OnObject(events, workflowEvents);
     }
 
+    /** Parsing Event **/
     public DocumentModel.Event parseEvent(MappingNode eventNode) {
+        //TODO fix Event name being wrong when argument branches
+        logger.info("Parsing Event");
         var builder = DocumentModel.Event.builder();
         builder.eventName(getSingletonMapKey(eventNode));
-        mappingToMap(getSingletonMapValue(eventNode)).forEach( (s, n) -> {
+        System.err.println(eventNode.getValue());
+        var eventValue = getSingletonMapValue(eventNode);
+        if (eventValue instanceof SequenceNode) {
+            builder.filter(eventValue);
+            return builder.build();
+        }
+        mappingToMap((MappingNode) eventValue).forEach( (s, n) -> {
             switch (s) {
                 case "type" -> builder.type(getStringFromSequenceOrScalar(n));
                 case "schedule" -> builder.schedule(n);
@@ -107,12 +117,14 @@ public class ModelConstructorService {
         return builder.build();
     }
 
+    /** Parsing WorkflowEvent **/
     public WorkflowEvents.WorkflowEvent parseWorkflowEvent(MappingNode eventNode) {
+        logger.info("Parsing WorkflowEvent");
         var builder = WorkflowEvents.WorkflowEvent.builder();
         switch (getSingletonMapKey(eventNode)) {
             case "workflow_call" -> {
                 var callBuilder = WorkflowEvents.WorkflowCall.builder();
-                mappingToMap(getSingletonMapValue(eventNode)).forEach( (s,n) -> {
+                mappingToMap((MappingNode) getSingletonMapValue(eventNode)).forEach( (s, n) -> {
                     switch (s) {
                         case "inputs" -> callBuilder.input(n);
                         case "outputs" -> callBuilder.output(n);
@@ -123,7 +135,7 @@ public class ModelConstructorService {
             }
             case "workflow_run" -> {
                 var runBuilder = WorkflowEvents.WorkflowRun.builder();
-                mappingToMap(getSingletonMapValue(eventNode)).forEach( (s,n) -> {
+                mappingToMap((MappingNode) getSingletonMapValue(eventNode)).forEach( (s, n) -> {
                     switch (s) {
                         case "workflows" -> runBuilder.workflows(getStringFromSequenceOrScalar(n));
                         case "types" -> runBuilder.types(getStringFromSequenceOrScalar(n));
@@ -135,7 +147,7 @@ public class ModelConstructorService {
             }
             case "workflow_dispatch" -> {
                 var dispatchBuilder = WorkflowEvents.WorkflowDispatch.builder();
-                mappingToMap(getSingletonMapValue(eventNode)).forEach( (s,n) -> {
+                mappingToMap((MappingNode) getSingletonMapValue(eventNode)).forEach( (s, n) -> {
                     switch (s) {
                         case "input" -> dispatchBuilder.input(n);
                         case "output" -> dispatchBuilder.output(n);
@@ -146,14 +158,17 @@ public class ModelConstructorService {
         }
         return builder.build();
     }
-
+    /** Parsing ScalarNode Event with no arguments **/
     public List<DocumentModel.Event> parseSimpleEvent(ScalarNode eventNode) {
+        logger.info("Parsing simple Event");
         var builder = DocumentModel.Event.builder();
         builder.eventName(eventNode.getValue());
         return Collections.singletonList(builder.build());
     }
 
+    /** Parsing Sequence of Events with no arguments **/
     public List<DocumentModel.Event> parseSimpleEventSequence(SequenceNode eventSequenceNode) {
+        logger.info("Parsing simple Event sequence");
         List<DocumentModel.Event> event = new ArrayList<>();
         eventSequenceNode.getValue().forEach( s -> {
             var builder = DocumentModel.Event.builder();
@@ -163,8 +178,9 @@ public class ModelConstructorService {
         return event;
     }
 
-    /** Parse the "concurrency" keyword */
+    /** Parsing the "concurrency" keyword */
     private DocumentModel.Concurrency parseConcurrency(MappingNode concurrencyNode) {
+        logger.info("Parsing concurrency");
         var builder = DocumentModel.Concurrency.builder();
         mappingToMap(concurrencyNode).forEach( (s, n) -> {
            switch (s) {
@@ -175,10 +191,13 @@ public class ModelConstructorService {
         return builder.build();
     }
 
-    /** Parse the "jobs" keyword */
+    /** Parsing the "jobs" keyword */
     private List<DocumentModel.Job> parseJobs(MappingNode jobNode) {
+        logger.info("Parsing jobs");
         var jobs = new ArrayList<DocumentModel.Job>();
+        System.err.println(jobNode.getValue());
         mappingToMap(jobNode).forEach((jobName, node) -> {
+            System.err.println(node);
             var jobBuilder = DocumentModel.Job.builder();
             jobBuilder.name(jobName);
             var jobDetails = mappingToMap((MappingNode) node);
@@ -212,8 +231,9 @@ public class ModelConstructorService {
         return jobs;
     }
 
-    /** Parse the "permissions" keyword */
+    /** Parsing the "permissions" keyword */
     private Map<Secrets.PermissionType, Secrets.PermissionLevel> parsePermissions(Node permissionNode) {
+        logger.info("Parsing permissions");
         switch (permissionNode) {
             case ScalarNode s -> {
                 return parseScalarPermissions(s.getValue());
@@ -224,8 +244,9 @@ public class ModelConstructorService {
             default -> throw new IllegalArgumentException("Unexpected Node type when parsing permissions");
         }
     }
-
+    /** Parsing ScalarNode of permissions **/
     public Map<Secrets.PermissionType, Secrets.PermissionLevel> parseScalarPermissions(String permissionLevel) {
+        logger.info("Parsing scalar permissions");
         var level = switch (permissionLevel) {
             case "read-all" -> Secrets.PermissionLevel.READ;
             case "write-all" -> Secrets.PermissionLevel.WRITE;
@@ -238,14 +259,15 @@ public class ModelConstructorService {
         }
         return map;
     }
-
+    /** Parsing MappingNode of permissions **/
     public Map<Secrets.PermissionType, Secrets.PermissionLevel> parseMappingPermissions(MappingNode mappingNode) {
+        logger.info("Parsing mapping permissions");
         var map = new HashMap<Secrets.PermissionType,Secrets.PermissionLevel>();
         mappingToMap(mappingNode).forEach((string,node) -> {
             var level = switch (((ScalarNode)node).getValue()) {
-                case "read-all" -> Secrets.PermissionLevel.READ;
-                case "write-all" -> Secrets.PermissionLevel.WRITE;
-                case "{}" -> Secrets.PermissionLevel.NONE;
+                case "read" -> Secrets.PermissionLevel.READ;
+                case "write" -> Secrets.PermissionLevel.WRITE;
+                case "none" -> Secrets.PermissionLevel.NONE;
                 default -> throw new IllegalStateException("Failed to parse permissionLevel inside MappingNode");
             };
             map.put(Secrets.PermissionType.stringToPermissionType(string),level);
@@ -253,8 +275,9 @@ public class ModelConstructorService {
         return map;
     }
 
-    /** Parse the "runner" keyword */
+    /** Parsing the "runner" keyword */
     private List<DocumentModel.Runner> parseRunners(Node runnerNode) {
+        logger.info("Parsing runners");
         var runners = new ArrayList<DocumentModel.Runner>();
         if (runnerNode instanceof ScalarNode) {
             runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runnerNode).getValue()));
@@ -267,16 +290,18 @@ public class ModelConstructorService {
         return runners;
     }
 
-    /** Parse the "defaults" keyword */
+    /** Parsing the "defaults" keyword */
     private DocumentModel.Defaults parseDefaults(MappingNode defaultsNode) {
+        logger.info("Parsing defaults");
         var tupleList = ((MappingNode) defaultsNode.getValue().getFirst().getValueNode()).getValue();
         var shell = ((ScalarNode) tupleList.getFirst().getValueNode()).getValue();
         var working_dir = ((ScalarNode) tupleList.getLast().getValueNode()).getValue();
         return new DocumentModel.Defaults(shell,working_dir);
     }
 
-    /** Parse the "secrets" keyword */
+    /** Parsing the "secrets" keyword */
     private Map<String,Secrets.Secret> parseSecrets(MappingNode secretNode) {
+        logger.info("Parsing secrets");
         var secrets = new HashMap<String,Secrets.Secret>();
         var name = getSingletonMapKey(secretNode);
         mappingToMap(secretNode).forEach((string,node) -> {
@@ -331,14 +356,29 @@ public class ModelConstructorService {
         return newMap;
     }
 
+    /**
+     * Helper method to get the String key from a singleton Map NodeTuple
+     * @param mappingNode singleton map
+     * @return String contained in the NodeTuple key
+     */
     private String getSingletonMapKey(MappingNode mappingNode) {
         return ((ScalarNode) mappingNode.getValue().getFirst().getKeyNode()).getValue();
     }
 
-    private MappingNode getSingletonMapValue(MappingNode mappingNode) {
-        return (MappingNode) mappingNode.getValue().getFirst().getValueNode();
+    /**
+     * Helper method to get the map from the value node of a singleton Map NodeTuple
+     * @param mappingNode singleton map
+     * @return MappingNode contained in the NodeTuple value
+     */
+    private Node getSingletonMapValue(MappingNode mappingNode) {
+        return mappingNode.getValue().getFirst().getValueNode();
     }
 
+    /**
+     * Helper method to get a String list from a SequenceNode of ScalarNodes or a ScalarNode
+     * @param node SequenceNode of ScalarNodes or ScalarNode
+     * @return List of String values contained in Node
+     */
     private List<String> getStringFromSequenceOrScalar(Node node) {
         var list = new ArrayList<String>();
         if (node instanceof SequenceNode) {

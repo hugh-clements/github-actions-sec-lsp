@@ -6,6 +6,9 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Workspace sync class
+ */
 public class WorkspaceService implements org.eclipse.lsp4j.services.WorkspaceService {
 
     @Override
@@ -17,7 +20,6 @@ public class WorkspaceService implements org.eclipse.lsp4j.services.WorkspaceSer
     public void didChangeConfiguration(DidChangeConfigurationParams didChangeConfigurationParams) {
 
     }
-
 
     //TODO maybe not use these at all to check if a file
     @Override
