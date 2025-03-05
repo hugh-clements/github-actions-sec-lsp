@@ -79,7 +79,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             Node services,
             List<Step> steps, //TODO may need to expand this
             String uses,
-            Map<String,String> with,
+            With with,
             String passSecretTokenOrInherited,
             Node other
     ) {
@@ -101,14 +101,17 @@ public record DocumentModel(String lang, String documentURI, org.server.document
 
     @Builder
     public record Step(
+            String id,
             String condition,
             String name,
             String uses,
             String run,
             String workingDirectory,
             String shell,
-            Map<String, String> with,
-            Map<String, String> env
+            With with,
+            Map<String, String> env,
+            Boolean continueOnError,
+            Node other
     ) {}
 
     public enum Runner {
@@ -150,4 +153,12 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             };
         }
     }
+
+    @Builder
+    public record With(
+            @Singular List<String> values,
+            String entrypoint,
+            String args,
+            @Singular Map<String, String> mappings
+    ) {}
 }

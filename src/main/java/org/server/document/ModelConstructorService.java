@@ -122,6 +122,10 @@ public class ModelConstructorService {
         switch (name) {
             case "workflow_call" -> {
                 var callBuilder = WorkflowEvents.WorkflowCall.builder();
+                if (node instanceof ScalarNode) {
+                    builder.workflowCall(callBuilder.build()).build();
+                    break;
+                }
                 mappingToMap(node).forEach( (s, n) -> {
                     switch (s) {
                         case "inputs" -> callBuilder.input(n);
@@ -133,6 +137,10 @@ public class ModelConstructorService {
             }
             case "workflow_run" -> {
                 var runBuilder = WorkflowEvents.WorkflowRun.builder();
+                if (node instanceof ScalarNode) {
+                    builder.workflowRun(runBuilder.build()).build();
+                    break;
+                }
                 mappingToMap(getSingletonMapValue((MappingNode) node)).forEach( (s, n) -> {
                     switch (s) {
                         case "workflows" -> runBuilder.workflows(getStringFromSequenceOrScalar(n));
@@ -145,6 +153,10 @@ public class ModelConstructorService {
             }
             case "workflow_dispatch" -> {
                 var dispatchBuilder = WorkflowEvents.WorkflowDispatch.builder();
+                if (node instanceof ScalarNode) {
+                    builder.workflowDispatch(dispatchBuilder.build()).build();
+                    break;
+                }
                 mappingToMap(getSingletonMapValue((MappingNode) node)).forEach( (s, n) -> {
                     switch (s) {
                         case "input" -> dispatchBuilder.input(n);
@@ -219,7 +231,7 @@ public class ModelConstructorService {
                     case "steps" -> jobBuilder.steps(parseSteps(value));
                     case "uses" -> jobBuilder.uses(parseToString(value));
                     case "with" -> jobBuilder.with(parseWith(value));
-                    case "secrets" -> jobBuilder.passSecretTokenOrInherited(getSingletonMapValueString((MappingNode) value));
+                    case "secrets" -> jobBuilder.passSecretTokenOrInherited(parsePassSecret(value));
                     default -> jobBuilder.other(value);
                 }
             });
@@ -298,14 +310,53 @@ public class ModelConstructorService {
 
     private List<DocumentModel.Step> parseSteps(Node stepsNode) {
         logger.info("Parsing steps");
-
-        return new ArrayList<>();
+        var steps = new ArrayList<DocumentModel.Step>();
+        switch (stepsNode) {
+            case ScalarNode _-> {
+                steps.add(DocumentModel.Step.builder().build());
+                return steps;
+            }
+            case SequenceNode sq -> {
+                sq.getValue().forEach(map -> {
+                    var builder = DocumentModel.Step.builder();
+                    mappingToMap(map).forEach( (key, value) -> {
+                        switch (key) {
+                            case "id" -> builder.id(parseToString(value));
+                            case "if" -> builder.condition(parseToString(value));
+                            case "name" -> builder.name(parseToString(value));
+                            case "uses" -> builder.uses(parseToString(value));
+                            case "run" -> builder.run(parseToString(value));
+                            case "working-directory" -> builder.workingDirectory(parseToString(value));
+                            case "shell" -> builder.shell(parseToString(value));
+                            case "with" -> builder.with(parseWith(value));
+                            case "env" -> builder.env(parseToStringMap((MappingNode) value));
+                            default -> throw new IllegalArgumentException("Failed to parse steps inside Steps");
+                        }
+                    });
+                    steps.add(builder.build());
+                });
+                return steps;
+            }
+            default -> throw new IllegalArgumentException("Unexpected node type in Steps: " + stepsNode);
+        }
     }
 
-    private Map<String, String> parseWith(Node withNode) {
+    private DocumentModel.With parseWith(Node withNode) {
         logger.info("Parsing with");
-
-        return new HashMap<>();
+        var builder = DocumentModel.With.builder();
+        switch (withNode) {
+            case ScalarNode s -> builder.value(s.getValue());
+            case SequenceNode sq -> sq.getValue().forEach(node -> {
+                switch (node) {
+                    case MappingNode m -> builder.mapping(getSingletonMapKey(m),getSingletonMapValueString(m));
+                    case ScalarNode s -> builder.value(parseToString(s));
+                    default -> throw new IllegalArgumentException("Unexpected node type in With SequenceNode: " + node);
+                }
+            });
+            case MappingNode m -> mappingToMap(m).forEach( (string, node) -> builder.mapping(string,parseToString(node)));
+            default -> throw new IllegalArgumentException("Unexpected node type in With: " + withNode);
+        }
+        return builder.build();
     }
 
     /** Parsing the "secrets" keyword */
@@ -323,6 +374,14 @@ public class ModelConstructorService {
             secrets.put(secretName, builder.build());
         });
         return secrets;
+    }
+
+    private String parsePassSecret(Node secretPassNode) {
+        return switch (secretPassNode) {
+            case ScalarNode s -> s.getValue();
+            case MappingNode m -> getSingletonMapValueString(m);
+            default -> throw new IllegalArgumentException("Unexpected node type: " + secretPassNode);
+        };
     }
 
     /**
