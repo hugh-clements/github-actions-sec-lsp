@@ -87,12 +87,22 @@ public class NodeParserTest {
     }
 
     @Test
+    public void testNodeParserSecrets2() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/testSecrets2.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed);
+    }
+
+    @Test
     public void testNodeParserWorkflowEvents1() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/testWorkflowEvents1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
         Utils.prettyPrint(parsed);
     }
+
+
 
 
 

@@ -19,7 +19,7 @@ public class WorkflowEvents {
     public record WorkflowCall(
         Node input,
         Node output,
-        Map<String,Secrets.Secret> secrets
+        Map<String, SecretsAndPermissions.Secret> secrets
 
     ) {}
 

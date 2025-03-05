@@ -24,15 +24,16 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             String runName,
             OnObject on,
             Defaults defaults,
+            Map<String, String> env,
             List<Job> jobs,
-            Map<Secrets.PermissionType, Secrets.PermissionLevel> permissions,
+            Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> permissions,
             Concurrency concurrency
     ) {
     }
 
     @Builder
     public record OnObject(
-            List<Event> event,
+            List<Event> events,
             List<WorkflowEvents.WorkflowEvent> workFlowEvent
     ) {
     }
@@ -62,8 +63,9 @@ public record DocumentModel(String lang, String documentURI, org.server.document
 
     @Builder
     public record Job(
-            String name,
-            Map<Secrets.PermissionType, Secrets.PermissionLevel> permissions,
+            String jobId,
+            String jobName,
+            Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> permissions,
             String condition,
             List<String> needs,
             List<Runner> runsOn,
@@ -75,10 +77,10 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             String environment,
             Node container,
             Node services,
-            List<Node> steps,
+            List<Step> steps, //TODO may need to expand this
             String uses,
-            String with,
-            Map<String,Secrets.Secret> secret,
+            Map<String,String> with,
+            String passSecretTokenOrInherited,
             Node other
     ) {
     }
@@ -96,6 +98,18 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             String workingDirectory
     ) {
     }
+
+    @Builder
+    public record Step(
+            String condition,
+            String name,
+            String uses,
+            String run,
+            String workingDirectory,
+            String shell,
+            Map<String, String> with,
+            Map<String, String> env
+    ) {}
 
     public enum Runner {
         self_hosted,

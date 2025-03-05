@@ -17,8 +17,8 @@ public class DocumentService implements TextDocumentService {
 
     private final LanguageServer languageServer;
     private DocumentModel documentModel;
-    private ModelConstructorService modelConstructorService;
-    private DiagnosticService diagnosticService;
+    private final ModelConstructorService modelConstructorService;
+    private final DiagnosticService diagnosticService;
 
     Logger logger = LogManager.getLogger(getClass());
 
@@ -54,12 +54,10 @@ public class DocumentService implements TextDocumentService {
             logger.error("Failed to construct document model on open", e);
         }
 
-        CompletableFuture.runAsync(() -> {
-            languageServer.client.publishDiagnostics(
-                    new PublishDiagnosticsParams(didOpenTextDocumentParams.getTextDocument().getUri(),
-                            diagnosticService.diagnose(documentModel))
-            );
-        });
+        CompletableFuture.runAsync(() -> languageServer.client.publishDiagnostics(
+                new PublishDiagnosticsParams(didOpenTextDocumentParams.getTextDocument().getUri(),
+                        diagnosticService.diagnose(documentModel))
+        ));
     }
 
     @Override
@@ -75,12 +73,10 @@ public class DocumentService implements TextDocumentService {
             logger.error("Failed to construct document model on change", e);
         }
 
-        CompletableFuture.runAsync(() -> {
-            languageServer.client.publishDiagnostics(
-                    new PublishDiagnosticsParams(didChangeTextDocumentParams.getTextDocument().getUri(),
-                            diagnosticService.diagnose(documentModel))
-            );
-        });
+        CompletableFuture.runAsync(() -> languageServer.client.publishDiagnostics(
+                new PublishDiagnosticsParams(didChangeTextDocumentParams.getTextDocument().getUri(),
+                        diagnosticService.diagnose(documentModel))
+        ));
     }
 
     @Override

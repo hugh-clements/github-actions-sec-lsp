@@ -10,6 +10,9 @@ concurrency:
 
 jobs:
   test:
+    concurrency:
+      group: example-group
+      cancel-in-progress: true
     steps:
       - name: blank
         uses: "this"

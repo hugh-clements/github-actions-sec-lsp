@@ -9,7 +9,7 @@ public class ParseYAMLTest {
 
     @Test
     public void testParseYAML() throws IOException {
-        String toParse = Files.readString(Path.of("src/test/resources/test1.yaml"));
+        String toParse = Files.readString(Path.of("src/test/resources/testConcurrency1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsedYAML = modelConstructorService.parseYAML(toParse);
         assert parsedYAML instanceof MappingNode;

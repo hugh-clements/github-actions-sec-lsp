@@ -2,12 +2,11 @@ package org.server.document;
 
 import lombok.Builder;
 
-import java.util.Map;
-
-public class Secrets {
+public class SecretsAndPermissions {
 
     @Builder
     public record Secret(
+            Boolean inherited,
             String accessToken,
             String description,
             Boolean required
@@ -42,7 +41,7 @@ public class Secrets {
                 case "checks" -> PermissionType.CHECKS;
                 case "contents" -> PermissionType.CONTENTS;
                 case "deployments" -> PermissionType.DEPLOYMENTS;
-                case "id_tokens" -> PermissionType.ID_TOKENS;
+                case "id-token" -> PermissionType.ID_TOKENS;
                 case "issues" -> PermissionType.ISSUES;
                 case "discovery" -> PermissionType.DISCUSSIONS;
                 case "packages" -> PermissionType.PACKAGES;
