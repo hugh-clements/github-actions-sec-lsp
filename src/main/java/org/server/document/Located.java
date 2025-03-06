@@ -8,3 +8,4 @@ package org.server.document;
  * @param <T> The type of the node in the data structure
  */
 public record Located<T>(int row, int col, T value) { }
+//TODO may need to make start and end located

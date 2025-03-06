@@ -23,6 +23,8 @@ public class ModelConstructorService {
      */
     public DocumentModel modelConstructor(String lang, String documentURI, String text) {
         logger.info("Constructing model");
+        //Checking if the lang is yaml
+        if (!Objects.equals(lang, "yaml")) return new DocumentModel(lang, null, null);
         var node = parseYAML(text);
         if (!(node instanceof MappingNode)) {
             logger.warn("Not a mapping node, setting model to null");
