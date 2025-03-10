@@ -1,5 +1,6 @@
 import org.junit.jupiter.api.Test;
 import org.server.document.ModelConstructorService;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,7 +12,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/test1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -19,7 +20,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/test2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -27,7 +28,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testConcurrency1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -35,7 +36,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testDefaults1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -43,7 +44,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testEvents1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -51,7 +52,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testEvents2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -59,7 +60,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testPermissions1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -67,7 +68,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testPermissions2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -75,7 +76,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testPermissions3.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -83,7 +84,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSecrets1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -91,7 +92,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSecrets2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -99,7 +100,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testWorkflowEvents1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -107,7 +108,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -115,7 +116,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -123,7 +124,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps3.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -131,7 +132,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps4.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
     @Test
@@ -139,7 +140,7 @@ public class NodeParserTest {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps5.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
-        Utils.prettyPrint(parsed);
+        Utils.prettyPrint(parsed.value());
     }
 
 

@@ -5,6 +5,7 @@ import lombok.Singular;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.nodes.Node;
+
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import java.util.Map;
  * @param documentURI document path
  * @param model Data structure that represents the YAML document structure
  */
-public record DocumentModel(String lang, String documentURI, org.server.document.DocumentModel.Model model ) {
+public record DocumentModel(String lang, String documentURI, org.server.document.DocumentModel.Model model) {
 
     static Logger logger = LogManager.getLogger(DocumentModel.class);
 

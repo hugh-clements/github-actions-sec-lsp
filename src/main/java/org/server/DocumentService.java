@@ -6,6 +6,7 @@ import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.server.diagnostic.DiagnosticService;
 import org.server.document.DocumentModel;
+import org.server.document.Located;
 import org.server.document.ModelConstructorService;
 
 import java.util.concurrent.CompletableFuture;
@@ -16,7 +17,7 @@ import java.util.concurrent.CompletableFuture;
 public class DocumentService implements TextDocumentService {
 
     private final LanguageServer languageServer;
-    private DocumentModel documentModel;
+    private Located<DocumentModel> documentModel;
     private final ModelConstructorService modelConstructorService;
     private final DiagnosticService diagnosticService;
 
@@ -66,8 +67,8 @@ public class DocumentService implements TextDocumentService {
         String documentChangeString = didChangeTextDocumentParams.getContentChanges().getFirst().getText();
         try {
             this.documentModel = modelConstructorService.modelConstructor(
-                    this.documentModel.lang()
-                    ,this.documentModel.documentURI(),
+                    this.documentModel.value().lang()
+                    ,this.documentModel.value().documentURI(),
                     documentChangeString);
         } catch (Exception e) {
             logger.error("Failed to construct document model on change", e);

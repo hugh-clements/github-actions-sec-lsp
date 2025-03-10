@@ -3,10 +3,12 @@ package org.server.document;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.ScalarNode;
 import org.yaml.snakeyaml.nodes.SequenceNode;
+
 import java.io.StringReader;
 import java.util.*;
 
@@ -15,23 +17,25 @@ import java.util.*;
  */
 public class ModelConstructorService {
 
-    Logger logger = LogManager.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
+
 
     /**
      * Method that parses YAML and then constructs a DocumentModel
+     *
      * @return new Document model reflecting the current document in the client
      */
-    public DocumentModel modelConstructor(String lang, String documentURI, String text) {
+    public Located<DocumentModel> modelConstructor(String lang, String documentURI, String text) {
         logger.info("Constructing model");
         //Checking if the lang is yaml
-        if (!Objects.equals(lang, "yaml")) return new DocumentModel(lang, null, null);
+        if (!Objects.equals(lang, "yaml")) return new Located<>(1, 1, 1, 1, new DocumentModel(lang, null, null));
         var node = parseYAML(text);
         if (!(node instanceof MappingNode)) {
             logger.warn("Not a mapping node, setting model to null");
-            return new DocumentModel(lang, documentURI, null);
+            return new Located<>(1, 1, 1, 1, new DocumentModel(lang, documentURI, null));
         }
         var model = parseNode((MappingNode) node);
-        return new DocumentModel(lang, documentURI, model);
+        return Located.locate(node, new DocumentModel(lang, documentURI, model));
     }
 
     /**
@@ -42,7 +46,14 @@ public class ModelConstructorService {
     public Node parseYAML(String text) {
         logger.info("Parsing String into YAML");
         Yaml yaml = new Yaml();
-        return yaml.compose(new StringReader(text));
+        Node node;
+        try {
+            node = yaml.compose(new StringReader(text));
+        } catch (YAMLException e) {
+            logger.warn("Document is not valid YAML");
+            return null;
+        }
+        return node;
     }
 
     /**

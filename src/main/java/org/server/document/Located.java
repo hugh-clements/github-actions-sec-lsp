@@ -1,11 +1,26 @@
 package org.server.document;
 
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+import org.yaml.snakeyaml.nodes.Node;
+
+
 /**
- * Used to store location information for any node with in the data structure
- * @param row
- * @param col
- * @param value of the node of type <T>
- * @param <T> The type of the node in the data structure
+ * @param startRow
+ * @param startCol
+ * @param endRow
+ * @param endCol
+ * @param value
+ * @param <T>
  */
-public record Located<T>(int row, int col, T value) { }
-//TODO may need to make start and end located
+public record Located<T>(int startRow, int startCol, int endRow, int endCol, T value) {
+
+    public static <T> Located<T> locate(Node node, T object) {
+        return new Located<>(node.getStartMark().getLine(), node.getStartMark().getColumn(), node.getEndMark().getLine(), node.getEndMark().getColumn(), object);
+    }
+
+    public static Range locatedToRange(Located<?> located) {
+        return new Range(new Position(located.startRow, located.startCol), new Position(located.endRow, located.endCol));
+    }
+}
+
