@@ -21,10 +21,18 @@ public class DiagnosticBuilderService {
     public enum DiagnosticType {
         IncorrectLang,
         IncorrectDirectory,
-        NotValidYAML;
+        NotValidYAML,
+
+        ;
 
         public String getDiagnosticExplanation(DiagnosticType diagnosticType) {
             return toString();
+        }
+
+        public DiagnosticSeverity getSeverity(DiagnosticType diagnosticType) {
+            return switch (diagnosticType) {
+                case IncorrectLang, IncorrectDirectory, NotValidYAML -> DiagnosticSeverity.ERROR;
+            };
         }
     }
 
