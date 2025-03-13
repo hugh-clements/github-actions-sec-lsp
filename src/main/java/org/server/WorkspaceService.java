@@ -17,19 +17,16 @@ public class WorkspaceService implements org.eclipse.lsp4j.services.WorkspaceSer
     }
 
     @Override
-    public void didChangeConfiguration(DidChangeConfigurationParams didChangeConfigurationParams) {
+    public void didChangeConfiguration(DidChangeConfigurationParams didChangeConfigurationParams) {}
 
-    }
-
-    //TODO maybe not use these at all to check if a file
     @Override
     public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params) {
+        //TODO use this to give warnings
         org.eclipse.lsp4j.services.WorkspaceService.super.didChangeWorkspaceFolders(params);
     }
 
 
     @Override
-    public void didChangeWatchedFiles(DidChangeWatchedFilesParams didChangeWatchedFilesParams) {
+    public void didChangeWatchedFiles(DidChangeWatchedFilesParams didChangeWatchedFilesParams) {}
 
-    }
 }

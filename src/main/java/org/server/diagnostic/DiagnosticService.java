@@ -25,6 +25,7 @@ public class DiagnosticService {
     public DiagnosticService() {
         diagnosticProviders = List.of(
                 DiagnosticService::getCommandExecutionDiagnostic,
+                DiagnosticService::getCodeInjectDiagnostic,
                 DiagnosticService::getRepojackableDiagnostic,
                 DiagnosticService::getPWNInjectionDiagnostic,
                 DiagnosticService::getRunnerHijackingDiagnostic,
@@ -35,6 +36,11 @@ public class DiagnosticService {
         );
     }
 
+    /**
+     * Calls all diagnostic methods to get all errors, warnings and information
+     * @param document document model to diagnose
+     * @return list of all diagnostics
+     */
     public List<Diagnostic> diagnose(Located<DocumentModel> document) {
         logger.info("Diagnosing {}", document);
         var diagnosticList = new ArrayList<>(diagnosticProviders.stream().flatMap(method -> method.apply(document.value()).stream()).toList());
@@ -42,6 +48,11 @@ public class DiagnosticService {
         return diagnosticList;
     }
 
+    /**
+     * Helper method to global diagnostics
+     * @param locatedDocument documentModel with locations
+     * @return list of global diagnostics
+     */
     public static List<Diagnostic> getGlobalDiagnostic(Located<DocumentModel> locatedDocument) {
         var document = locatedDocument.value();
         var list = new ArrayList<Diagnostic>();
@@ -51,13 +62,20 @@ public class DiagnosticService {
         }
         //Check if document is valid yaml
         if (document.model() == null) {
-
+            list.add(diagnosticBuilderService.getOverallDiagnostic(locatedDocument, DiagnosticBuilderService.DiagnosticType.NotValidYAML));
         }
         //Check if document is in correct directory
+        if (document.documentURI().contains("github/workflows/")) {
+            list.add(diagnosticBuilderService.getOverallDiagnostic(locatedDocument,DiagnosticBuilderService.DiagnosticType.IncorrectDirectory));
+        }
         return list;
     }
 
     public static List<Diagnostic> getCommandExecutionDiagnostic(DocumentModel document) {
+        return null;
+    }
+
+    public static List<Diagnostic> getCodeInjectDiagnostic(DocumentModel document) {
         return null;
     }
 
@@ -85,7 +103,15 @@ public class DiagnosticService {
     }
 
     public static List<Diagnostic> getRunnerHijackingDiagnostic(DocumentModel document) {
-        return null;
+        var diagnostics = new ArrayList<Diagnostic>();
+        document.model().jobs().forEach(job -> {
+            job.runsOn().forEach(runnerLocated -> {
+                //Checking if any self-hosted runners are being used
+                if (runnerLocated.value() != DocumentModel.Runner.self_hosted) return;
+                diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(runnerLocated, DiagnosticBuilderService.DiagnosticType.RunnerHijacker));
+            });
+        });
+        return diagnostics;
     }
 
     public static List<Diagnostic> getUnpinnedActionDiagnostic(DocumentModel document) {

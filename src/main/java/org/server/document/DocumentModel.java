@@ -69,7 +69,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> permissions,
             String condition,
             List<String> needs,
-            List<Runner> runsOn,
+            List<Located<Runner>> runsOn,
             Map<String, String> env,
             Concurrency concurrency,
             String group,
