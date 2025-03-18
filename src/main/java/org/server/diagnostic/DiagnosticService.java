@@ -97,6 +97,7 @@ public class DiagnosticService {
 
     public static List<Diagnostic> getRepojackableDiagnostic(DocumentModel document) {
         var diagnostics = new ArrayList<Diagnostic>();
+        //Check commit
         return diagnostics;
     }
 
@@ -113,51 +114,41 @@ public class DiagnosticService {
     public static List<Diagnostic> getUnpinnedActionDiagnostic(DocumentModel document) {
         var diagnostics = new ArrayList<Diagnostic>();
         document.model().jobs().forEach(job -> {
-            if (job.uses() == null) return;
-            var jobUses = job.uses().value();
-            var jobCommitHash = jobUses.split("@");
-            if (!jobCommitHash[1].matches(commitHashRegex)) {
-                diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(job.uses(), DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
-            }
-            switch (jobUses) {
-                case String a when a.contains("docker") -> {
-                    return;
-                }
-                case String b when b.contains("./") -> {
-                    return;
-                }
-                default -> {
-                    var split = jobUses.split("[/@]");
-                    var statusCode = validateGitHubCommitHash(split[0],split[1],split[split.length-1]);
-                    if (statusCode == null || statusCode.get("status").getAsInt() != 200) {
-                        diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(job.uses(), DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
-                    }
-                }
-            }
-            job.steps().forEach(step -> {
-                if (step.uses() == null) return;
-                var stepUses = step.uses().value();
-                var stepCommitHash = stepUses.split("@");
-                if (!stepCommitHash[1].matches(commitHashRegex)) {
-                    diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(step.uses(), DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
-                }
-                switch (stepUses) {
-                    case String a when a.contains("docker") -> {}
-                    case String b when b.contains("./") -> {}
-                    default -> {
-                        var split = stepUses.split("[/@]");
-                        var statusCode = validateGitHubCommitHash(split[0],split[1],split[split.length-1]);
-                        if (statusCode == null || statusCode.get("status").getAsInt() != 200) {
-                            diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(step.uses(), DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
-                        }
-                    }
-                }
-            });
+            checkUnpinnedAction(diagnostics,job.uses());
+            job.steps().forEach(step -> checkUnpinnedAction(diagnostics,step.uses()));
         });
         return diagnostics;
     }
 
-    public static JsonObject validateGitHubCommitHash(String owner, String repo, String commitHash) {
+    public static void checkUnpinnedAction(List<Diagnostic> diagnostics, Located<String> uses) {
+        if (uses == null) return;
+        var value = uses.value();
+        var commitHash = value.split("@");
+        if (!commitHash[1].matches(commitHashRegex)) {
+            diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
+        }
+        switch (value) {
+            case String a when a.contains("docker") -> {}
+            case String b when b.contains("./") -> {}
+            default -> {
+                var split = value.split("[/@]");
+                var statusCode = getCommitFromHash(split[0],split[1],split[split.length-1]);
+                if (statusCode == null || statusCode.get("status").getAsInt() != 200) {
+                    diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Helper method that retrieves the commit data from GitHub from the SAH hash
+     * @param owner repository owner
+     * @param repo repository name
+     * @param commitHash commit hash to get
+     * @return Json object result fromm GitHub API
+     */
+    public static JsonObject getCommitFromHash(String owner, String repo, String commitHash) {
         var client = HttpClient.newHttpClient();
         var request = HttpRequest.newBuilder()
                 .header("User-Agent", "Security-LSP")
@@ -171,5 +162,23 @@ public class DiagnosticService {
         }
     }
 
-
+    /**
+     * Helper method to get all repository commits
+     * @param owner repository owner
+     * @param repo repository name
+     * @return Json Object result fromm GitHub API
+     */
+    public static JsonObject getRepoCommits(String owner, String repo) {
+        var client = HttpClient.newHttpClient();
+        var request = HttpRequest.newBuilder()
+                .header("User-Agent", "Security-LSP")
+                .uri(URI.create(" https://api.github.com/repos/" + owner + "/" + repo + "/commits")).GET().build();
+        try {
+            JsonElement element = new JsonPrimitive(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
+            return element.getAsJsonObject();
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
+    }
 }
