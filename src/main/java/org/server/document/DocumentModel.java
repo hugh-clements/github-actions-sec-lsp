@@ -79,7 +79,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             Node container,
             Node services,
             List<Step> steps, //TODO may need to expand this
-            String uses,
+            Located<String> uses,
             With with,
             String passSecretTokenOrInherited,
             Node other
@@ -105,7 +105,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             String id,
             String condition,
             String name,
-            String uses,
+            Located<String> uses,
             String run,
             String workingDirectory,
             String shell,

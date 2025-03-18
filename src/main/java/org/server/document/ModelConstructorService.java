@@ -242,7 +242,7 @@ public class ModelConstructorService {
                     case "container" -> jobBuilder.container(value);
                     case "services" -> jobBuilder.services(value);
                     case "steps" -> jobBuilder.steps(parseSteps(value));
-                    case "uses" -> jobBuilder.uses(parseToString(value));
+                    case "uses" -> jobBuilder.uses(Located.locate(value,parseToString(value)));
                     case "with" -> jobBuilder.with(parseWith(value));
                     case "secrets" -> jobBuilder.passSecretTokenOrInherited(parsePassSecret(value));
                     default -> jobBuilder.other(value);
@@ -298,13 +298,13 @@ public class ModelConstructorService {
     }
 
     /** Parsing the "runner" keyword */
-    private List<DocumentModel.Runner> parseRunners(Node runnerNode) {
+    private List<Located<DocumentModel.Runner>> parseRunners(Node runnerNode) {
         logger.info("Parsing runners");
-        var runners = new ArrayList<DocumentModel.Runner>();
+        var runners = new ArrayList<Located<DocumentModel.Runner>>();
         if (runnerNode instanceof ScalarNode) {
-            runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runnerNode).getValue()));
+            runners.add(Located.locate(runnerNode,DocumentModel.Runner.toRunner(((ScalarNode) runnerNode).getValue())));
         } else if (runnerNode instanceof SequenceNode) {
-            ((SequenceNode) runnerNode).getValue().forEach(runner -> runners.add(DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue())));
+            ((SequenceNode) runnerNode).getValue().forEach(runner -> runners.add(Located.locate(runnerNode,DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue()))));
         } else {
             logger.error("Failed Node: {}", runnerNode);
             throw new IllegalArgumentException("Failed to parse Runners, Node is not SequenceNode or ScalarNode");
@@ -337,7 +337,7 @@ public class ModelConstructorService {
                             case "id" -> builder.id(parseToString(value));
                             case "if" -> builder.condition(parseToString(value));
                             case "name" -> builder.name(parseToString(value));
-                            case "uses" -> builder.uses(parseToString(value));
+                            case "uses" -> builder.uses(Located.locate(value,parseToString(value)));
                             case "run" -> builder.run(parseToString(value));
                             case "working-directory" -> builder.workingDirectory(parseToString(value));
                             case "shell" -> builder.shell(parseToString(value));

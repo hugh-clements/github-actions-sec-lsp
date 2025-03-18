@@ -1,5 +1,8 @@
 package org.server.diagnostic;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
@@ -17,10 +20,12 @@ import java.util.function.Function;
 
 public class DiagnosticService {
 
-    Logger logger = LogManager.getLogger(getClass());
+    static Logger logger = LogManager.getLogger(DiagnosticService.class);
 
     private final List<Function<DocumentModel,List<Diagnostic>>> diagnosticProviders;
     private static final DiagnosticBuilderService diagnosticBuilderService = new DiagnosticBuilderService();
+
+    private static final String commitHashRegex = "/\b([a-f0-9]{40})\b/";
 
     public DiagnosticService() {
         diagnosticProviders = List.of(
@@ -29,7 +34,6 @@ public class DiagnosticService {
                 DiagnosticService::getRepojackableDiagnostic,
                 DiagnosticService::getPWNInjectionDiagnostic,
                 DiagnosticService::getRunnerHijackingDiagnostic,
-                DiagnosticService::getPermissionControlDiagnostic,
                 DiagnosticService::getUnpinnedActionDiagnostic,
                 DiagnosticService::getWorkflowRunDiagnostic,
                 DiagnosticService::getUnsafeInputAssignmentDiagnostic
@@ -92,34 +96,80 @@ public class DiagnosticService {
     }
 
     public static List<Diagnostic> getRepojackableDiagnostic(DocumentModel document) {
-        //Used for API call to GitHub to check repository
-        var client = HttpClient.newHttpClient();
-        var request = HttpRequest.newBuilder()
-                .uri(URI.create("")).GET().build();
-        var response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString());
-        //Get status code
-        //Try and check when the repo was created renamed etc
-        return null;
+        var diagnostics = new ArrayList<Diagnostic>();
+        return diagnostics;
     }
 
     public static List<Diagnostic> getRunnerHijackingDiagnostic(DocumentModel document) {
         var diagnostics = new ArrayList<Diagnostic>();
+        document.model().jobs().forEach(job -> job.runsOn().forEach(runnerLocated -> {
+            //Checking if any self-hosted runners are being used
+            if (runnerLocated.value() != DocumentModel.Runner.self_hosted) return;
+            diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(runnerLocated, DiagnosticBuilderService.DiagnosticType.RunnerHijacker));
+        }));
+        return diagnostics;
+    }
+
+    public static List<Diagnostic> getUnpinnedActionDiagnostic(DocumentModel document) {
+        var diagnostics = new ArrayList<Diagnostic>();
         document.model().jobs().forEach(job -> {
-            job.runsOn().forEach(runnerLocated -> {
-                //Checking if any self-hosted runners are being used
-                if (runnerLocated.value() != DocumentModel.Runner.self_hosted) return;
-                diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(runnerLocated, DiagnosticBuilderService.DiagnosticType.RunnerHijacker));
+            if (job.uses() == null) return;
+            var jobUses = job.uses().value();
+            var jobCommitHash = jobUses.split("@");
+            if (!jobCommitHash[1].matches(commitHashRegex)) {
+                diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(job.uses(), DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
+            }
+            switch (jobUses) {
+                case String a when a.contains("docker") -> {
+                    return;
+                }
+                case String b when b.contains("./") -> {
+                    return;
+                }
+                default -> {
+                    var split = jobUses.split("[/@]");
+                    var statusCode = validateGitHubCommitHash(split[0],split[1],split[split.length-1]);
+                    if (statusCode == null || statusCode.get("status").getAsInt() != 200) {
+                        diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(job.uses(), DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
+                    }
+                }
+            }
+            job.steps().forEach(step -> {
+                if (step.uses() == null) return;
+                var stepUses = step.uses().value();
+                var stepCommitHash = stepUses.split("@");
+                if (!stepCommitHash[1].matches(commitHashRegex)) {
+                    diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(step.uses(), DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
+                }
+                switch (stepUses) {
+                    case String a when a.contains("docker") -> {}
+                    case String b when b.contains("./") -> {}
+                    default -> {
+                        var split = stepUses.split("[/@]");
+                        var statusCode = validateGitHubCommitHash(split[0],split[1],split[split.length-1]);
+                        if (statusCode == null || statusCode.get("status").getAsInt() != 200) {
+                            diagnostics.add(diagnosticBuilderService.getSpecificDiagnostic(step.uses(), DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
+                        }
+                    }
+                }
             });
         });
         return diagnostics;
     }
 
-    public static List<Diagnostic> getUnpinnedActionDiagnostic(DocumentModel document) {
-        return null;
+    public static JsonObject validateGitHubCommitHash(String owner, String repo, String commitHash) {
+        var client = HttpClient.newHttpClient();
+        var request = HttpRequest.newBuilder()
+                .header("User-Agent", "Security-LSP")
+                .uri(URI.create(" https://api.github.com/repos/" + owner + "/" + repo + "/commits/" + commitHash)).GET().build();
+        try {
+            JsonElement element = new JsonPrimitive(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
+            return element.getAsJsonObject();
+        } catch (Exception e) {
+            logger.error(e);
+            return null;
+        }
     }
 
-    public static List<Diagnostic> getPermissionControlDiagnostic(DocumentModel document) {
-        return null;
-    }
 
 }
