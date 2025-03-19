@@ -2,21 +2,11 @@ package org.server.diagnostic;
 
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.server.document.DocumentModel;
 import org.server.document.Located;
 
 public class DiagnosticBuilderService {
 
-    public Diagnostic getOverallDiagnostic(Located<DocumentModel> documentModelLocated, DiagnosticType diagnosticType) {
-        var diagnostic = new Diagnostic();
-        diagnostic.setRange(Located.locatedToRange(documentModelLocated));
-        diagnostic.setSeverity(getSeverity(diagnosticType));
-        diagnostic.setMessage(getDiagnosticExplanation(diagnosticType));
-        diagnostic.setCode(diagnosticType.toString());
-        return diagnostic;
-    }
-
-    public Diagnostic getSpecificDiagnostic(Located<?> located, DiagnosticType diagnosticType) {
+    public static Diagnostic getDiagnostic(Located<?> located, DiagnosticType diagnosticType) {
         var diagnostic = new Diagnostic();
         diagnostic.setRange(Located.locatedToRange(located));
         diagnostic.setSeverity(getSeverity(diagnosticType));
@@ -40,7 +30,7 @@ public class DiagnosticBuilderService {
         UnsafeInputAssignment
     }
 
-    public String getDiagnosticExplanation(DiagnosticType diagnosticType) {
+    public static String getDiagnosticExplanation(DiagnosticType diagnosticType) {
         return switch (diagnosticType) {
             case IncorrectLang -> "Document is not in YAML format, all GitHub workflow files must be in YAML";
             case IncorrectDirectory -> "Workflow is not in the correct directory, all GitHub workflow files must be '.github/workflows'";
@@ -59,7 +49,7 @@ public class DiagnosticBuilderService {
         };
     }
 
-    public DiagnosticSeverity getSeverity(DiagnosticType diagnosticType) {
+    public static DiagnosticSeverity getSeverity(DiagnosticType diagnosticType) {
         return switch (diagnosticType) {
             case PWNInjection, PermissionControl, RunnerHijacker -> DiagnosticSeverity.Warning;
             case IncorrectLang, IncorrectDirectory, NotValidYAML, CommandExecution, CodeInject, UnsafeInputAssignment, WorkflowRun, Repojackable, UnpinnedAction-> DiagnosticSeverity.Error;
