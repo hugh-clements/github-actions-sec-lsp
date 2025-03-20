@@ -12,6 +12,8 @@ import org.yaml.snakeyaml.nodes.SequenceNode;
 import java.io.StringReader;
 import java.util.*;
 
+import static org.server.document.Located.locate;
+
 /**
  * Service that constructs a new DocumentModel to reflect the client state
  */
@@ -35,7 +37,7 @@ public class ModelConstructorService {
             return new Located<>(1, 1, 1, 1, new DocumentModel(lang, documentURI, null));
         }
         var model = parseNode((MappingNode) node);
-        return Located.locate(node, new DocumentModel(lang, documentURI, model));
+        return locate(node, new DocumentModel(lang, documentURI, model));
     }
 
     /**
@@ -242,7 +244,7 @@ public class ModelConstructorService {
                     case "container" -> jobBuilder.container(value);
                     case "services" -> jobBuilder.services(value);
                     case "steps" -> jobBuilder.steps(parseSteps(value));
-                    case "uses" -> jobBuilder.uses(Located.locate(value,parseToString(value)));
+                    case "uses" -> jobBuilder.uses(locate(value,parseToString(value)));
                     case "with" -> jobBuilder.with(parseWith(value));
                     case "secrets" -> jobBuilder.passSecretTokenOrInherited(parsePassSecret(value));
                     default -> jobBuilder.other(value);
@@ -302,9 +304,9 @@ public class ModelConstructorService {
         logger.info("Parsing runners");
         var runners = new ArrayList<Located<DocumentModel.Runner>>();
         if (runnerNode instanceof ScalarNode) {
-            runners.add(Located.locate(runnerNode,DocumentModel.Runner.toRunner(((ScalarNode) runnerNode).getValue())));
+            runners.add(locate(runnerNode,DocumentModel.Runner.toRunner(((ScalarNode) runnerNode).getValue())));
         } else if (runnerNode instanceof SequenceNode) {
-            ((SequenceNode) runnerNode).getValue().forEach(runner -> runners.add(Located.locate(runnerNode,DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue()))));
+            ((SequenceNode) runnerNode).getValue().forEach(runner -> runners.add(locate(runnerNode,DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue()))));
         } else {
             logger.error("Failed Node: {}", runnerNode);
             throw new IllegalArgumentException("Failed to parse Runners, Node is not SequenceNode or ScalarNode");
@@ -337,7 +339,7 @@ public class ModelConstructorService {
                             case "id" -> builder.id(parseToString(value));
                             case "if" -> builder.condition(parseToString(value));
                             case "name" -> builder.name(parseToString(value));
-                            case "uses" -> builder.uses(Located.locate(value,parseToString(value)));
+                            case "uses" -> builder.uses(locate(value,parseToString(value)));
                             case "run" -> builder.run(parseToString(value));
                             case "working-directory" -> builder.workingDirectory(parseToString(value));
                             case "shell" -> builder.shell(parseToString(value));
@@ -358,15 +360,15 @@ public class ModelConstructorService {
         logger.info("Parsing with");
         var builder = DocumentModel.With.builder();
         switch (withNode) {
-            case ScalarNode s -> builder.value(s.getValue());
+            case ScalarNode s -> builder.value(locate(s,s.getValue()));
             case SequenceNode sq -> sq.getValue().forEach(node -> {
                 switch (node) {
-                    case MappingNode m -> builder.mapping(getSingletonMapKey(m),getSingletonMapValueString(m));
-                    case ScalarNode s -> builder.value(parseToString(s));
+                    case MappingNode m -> builder.mapping(getSingletonMapKey(m), locate(m,getSingletonMapValueString(m)));
+                    case ScalarNode s -> builder.value(locate(s,parseToString(s)));
                     default -> throw new IllegalArgumentException("Unexpected node type in With SequenceNode: " + node);
                 }
             });
-            case MappingNode m -> mappingToMap(m).forEach( (string, node) -> builder.mapping(string,parseToString(node)));
+            case MappingNode m -> mappingToMap(m).forEach( (string, node) -> builder.mapping(string,locate(node, parseToString(node))));
             default -> throw new IllegalArgumentException("Unexpected node type in With: " + withNode);
         }
         return builder.build();

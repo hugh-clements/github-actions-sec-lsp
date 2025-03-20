@@ -35,7 +35,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     @Builder
     public record OnObject(
             List<Event> events,
-            List<WorkflowEvents.WorkflowEvent> workFlowEvent
+            List<WorkflowEvents.WorkflowEvent> workflowEvents
     ) {
     }
 
@@ -157,9 +157,9 @@ public record DocumentModel(String lang, String documentURI, org.server.document
 
     @Builder
     public record With(
-            @Singular List<String> values,
-            String entrypoint,
-            String args,
-            @Singular Map<String, String> mappings
+            @Singular List<Located<String>> values,
+            Located<String> entrypoint,
+            Located<String> args,
+            @Singular Map<String, Located<String>> mappings
     ) {}
 }

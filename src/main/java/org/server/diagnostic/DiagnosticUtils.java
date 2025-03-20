@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.server.document.DocumentModel;
+import org.server.document.Located;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -13,6 +15,8 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class DiagnosticUtils {
@@ -83,6 +87,14 @@ public class DiagnosticUtils {
         return between.compareTo(Duration.ofDays(30)) >= 0;
     }
 
+    public static List<Located<String>> getWithStrings(DocumentModel.With with) {
+        var stringList =  new ArrayList<Located<String>>();
+        stringList.addAll(with.values());
+        stringList.addAll(with.mappings().values());
+        stringList.add(with.args());
+        stringList.add(with.entrypoint());
+        return stringList;
+    }
 
 
 }
