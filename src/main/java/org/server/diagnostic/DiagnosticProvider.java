@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface DiagnosticProvider {
 
-    List<Diagnostic> diagnose(DocumentModel document);
+    List<Diagnostic> diagnose(DocumentModel doc);
 }

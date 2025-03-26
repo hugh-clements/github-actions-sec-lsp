@@ -1,5 +1,7 @@
 package org.server.diagnostic;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
 import org.server.document.DocumentModel;
 import org.server.document.Located;
@@ -8,21 +10,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
-import static org.server.diagnostic.DiagnosticUtils.getWithStrings;
 
-public class WorkflowRunDiagnosticProvider implements DiagnosticProvider {
+public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
+
+    static Logger logger = LogManager.getLogger(DiagnosticService.class);
+
+    private static final String refPullRequestMergeRegex = "/refs/pull/[a-zA-Z0-9._-]+/merge$";
 
     @Override
     public List<Diagnostic> diagnose(DocumentModel document) {
         var diagnostics = new ArrayList<Diagnostic>();
-        if (document.model().on().workflowEvents()
-                .stream().anyMatch(n -> n.workflowRun() != null)) {
+        if (document.model().on().events()
+                .stream().anyMatch(n -> n.eventName().equals("pull_request_target"))) {
             atJobsSteps(document, diagnostics);
         }
         return diagnostics;
     }
 
-    public void atJobsSteps(DocumentModel document, List<Diagnostic> diagnostics) {
+    private void atJobsSteps(DocumentModel document, List<Diagnostic> diagnostics) {
         document.model().jobs().forEach(job -> {
             var jobWithString= checkUsesWith(job.uses(), job.with());
             if (jobWithString != null) {
@@ -38,13 +43,17 @@ public class WorkflowRunDiagnosticProvider implements DiagnosticProvider {
 
     private Located<String> checkUsesWith(Located<String> uses, DocumentModel.With with) {
         if (uses.value().contains("actions/checkout")) {
-            return getWithStrings(with).stream()
-                    .filter(withString -> {
-                        var ref = withString.value().split("@");
-                        return ref.length > 1 && ref[1].contains("github.event.workflow_run");
-                    })
-                    .findFirst()
-                    .orElse(null);
+            var ref = with.mappings().entrySet().stream().filter(stringLocatedEntry -> stringLocatedEntry.getKey().equals("ref")).toList();
+            if (ref.isEmpty()) {
+                return null;
+            }
+            var refValue = ref.getFirst().getValue();
+            if (refValue.value() == null) return null;
+            //Check if is a pull request merge reference
+            if (refValue.value().matches(refPullRequestMergeRegex) &&
+            refValue.value().contains("github.event.pull_request.head")) {
+                return refValue;
+            }
         }
         return null;
     }

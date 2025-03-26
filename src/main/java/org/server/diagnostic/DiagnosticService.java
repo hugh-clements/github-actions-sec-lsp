@@ -21,7 +21,11 @@ public class DiagnosticService {
         diagnosticProviders = List.of(
                 new RunnerHijackingDiagnostic(),
                 new ActionReferencingDiagnosticProvider(),
-                new UnsafeInputAssignmentDiagnosticProvider()
+                new UnsafeInputAssignmentDiagnosticProvider(),
+                new WorkflowRunDiagnosticProvider(),
+                new PWNRequestDiagnosticProvider(),
+                new CodeInjectionDiagnosticProvider(),
+                new CommandExecutionDiagnosticProvider()
         );
     }
 
@@ -32,9 +36,9 @@ public class DiagnosticService {
      */
     public List<Diagnostic> diagnose(Located<DocumentModel> document) {
         logger.info("Diagnosing {}", document);
-        var globalDiagnostics = getGlobalDiagnostic(document);
-        if (!globalDiagnostics.isEmpty()) {
-            return globalDiagnostics;
+        var fileScopedDiagnostics = getFileScopedDiagnostics(document);
+        if (!fileScopedDiagnostics.isEmpty()) {
+            return fileScopedDiagnostics;
         }
         return new ArrayList<>(diagnosticProviders.stream()
                 .flatMap(instance -> instance.diagnose(document.value()).stream())
@@ -46,7 +50,7 @@ public class DiagnosticService {
      * @param locatedDocument documentModel with locations
      * @return list of global diagnostics
      */
-    public static List<Diagnostic> getGlobalDiagnostic(Located<DocumentModel> locatedDocument) {
+    public static List<Diagnostic> getFileScopedDiagnostics(Located<DocumentModel> locatedDocument) {
         var document = locatedDocument.value();
         var list = new ArrayList<Diagnostic>();
         //First checking if the Document is in yaml
@@ -62,25 +66,5 @@ public class DiagnosticService {
             list.add(getDiagnostic(locatedDocument,DiagnosticBuilderService.DiagnosticType.IncorrectDirectory));
         }
         return list;
-    }
-
-    public static List<Diagnostic> getCommandExecutionDiagnostic(DocumentModel document) {
-        return null;
-    }
-
-    public static List<Diagnostic> getCodeInjectDiagnostic(DocumentModel document) {
-        return null;
-    }
-
-    public static List<Diagnostic> getPWNInjectionDiagnostic(DocumentModel document) {
-        return null;
-    }
-
-    public static List<Diagnostic> getUnsafeInputAssignmentDiagnostic(DocumentModel document) {
-        return null;
-    }
-
-    public static List<Diagnostic> getWorkflowRunDiagnostic(DocumentModel document) {
-        return null;
     }
 }

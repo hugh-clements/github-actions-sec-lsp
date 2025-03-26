@@ -7,9 +7,9 @@ import org.server.document.DocumentModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
+import static org.server.diagnostic.DiagnosticUtils.getBetweenBraces;
 import static org.server.diagnostic.DiagnosticUtils.getWithStrings;
 
 public class UnsafeInputAssignmentDiagnosticProvider implements DiagnosticProvider{
@@ -33,12 +33,5 @@ public class UnsafeInputAssignmentDiagnosticProvider implements DiagnosticProvid
            //TODO figure out what is an unsafe input and add diagnostic if that is the case
            diagnostics.add(getDiagnostic(withString, DiagnosticBuilderService.DiagnosticType.UnsafeInputAssignment));
        } );
-    }
-
-    private String getBetweenBraces(String input) {
-        Pattern pattern = Pattern.compile("\\$\\{\\{(.*?)}}");
-        var matcher = pattern.matcher(input);
-        if (!matcher.find()) return null;
-        return matcher.group(1);
     }
 }

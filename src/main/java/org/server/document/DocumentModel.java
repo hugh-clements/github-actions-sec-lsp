@@ -50,18 +50,6 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     ) {
     }
 
-    /* RFU
-    @Builder
-    public record Filter(
-            List<String> tags,
-            List<String> tagIgnore,
-            List<String> branches,
-            List<String> branchIgnore,
-            List<String> paths,
-            List<String> pathIgnore
-    ) {
-    } */
-
     @Builder
     public record Job(
             String jobId,
@@ -106,7 +94,7 @@ public record DocumentModel(String lang, String documentURI, org.server.document
             String condition,
             String name,
             Located<String> uses,
-            String run,
+            Located<String> run,
             String workingDirectory,
             String shell,
             With with,

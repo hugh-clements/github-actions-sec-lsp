@@ -340,7 +340,7 @@ public class ModelConstructorService {
                             case "if" -> builder.condition(parseToString(value));
                             case "name" -> builder.name(parseToString(value));
                             case "uses" -> builder.uses(locate(value,parseToString(value)));
-                            case "run" -> builder.run(parseToString(value));
+                            case "run" -> builder.run(locate(value,parseToString(value)));
                             case "working-directory" -> builder.workingDirectory(parseToString(value));
                             case "shell" -> builder.shell(parseToString(value));
                             case "with" -> builder.with(parseWith(value));
