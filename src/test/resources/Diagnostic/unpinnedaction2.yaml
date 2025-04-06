@@ -1,0 +1,11 @@
+name: test unpinned action
+
+on: push
+
+jobs:
+  example-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2  # This is an example of an unpinned action (using a version tag instead of a commit hash)
+

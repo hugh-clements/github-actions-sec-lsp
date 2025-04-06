@@ -103,17 +103,20 @@ public class ModelConstructorService {
         mappingToMap(eventMappingNode).forEach((s, n) -> {
             switch (s) {
                 case "workflow_call","workflow_run","workflow_dispatch" -> workflowEvents.add(parseWorkflowEvent(s, n));
-                default -> events.add(parseEvent(s, (MappingNode) n));
+                default -> events.add(parseEvent(s, n));
             }
         });
         return new DocumentModel.OnObject(events, workflowEvents);
     }
 
     /** Parsing Event **/
-    public DocumentModel.Event parseEvent(String name, MappingNode eventNode) {
+    public DocumentModel.Event parseEvent(String name, Node eventNode) {
         logger.info("Parsing Event");
         var builder = DocumentModel.Event.builder().eventName(name);
-        var eventValue = getSingletonMapValue(eventNode);
+        if (eventNode instanceof ScalarNode) {
+            return builder.build();
+        }
+        var eventValue = getSingletonMapValue((MappingNode) eventNode);
         if (eventValue instanceof SequenceNode) {
             builder.filter(eventValue);
             return builder.build();

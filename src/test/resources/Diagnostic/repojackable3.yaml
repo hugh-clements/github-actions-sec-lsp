@@ -1,0 +1,15 @@
+name: Vulnerable Workflow
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run repojackable action
+        # Vulnerable reference: "old-org" might be renamed or disappear,
+        # allowing an attacker to take control of "repojackable-action"
+        uses: old-org/repojackable-action@v1

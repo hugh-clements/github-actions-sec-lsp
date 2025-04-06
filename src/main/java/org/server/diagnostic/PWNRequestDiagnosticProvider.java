@@ -9,7 +9,8 @@ import org.server.document.Located;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
+import static org.server.diagnostic.DiagnosticUtils.atJobsSteps;
+
 
 public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
 
@@ -19,27 +20,15 @@ public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
 
     @Override
     public List<Diagnostic> diagnose(DocumentModel document) {
+        logger.info("Diagnosing PWN request");
         var diagnostics = new ArrayList<Diagnostic>();
         if (document.model().on().events()
                 .stream().anyMatch(n -> n.eventName().equals("pull_request_target"))) {
-            atJobsSteps(document, diagnostics);
+            atJobsSteps(this::checkUsesWith,document, diagnostics);
         }
         return diagnostics;
     }
 
-    private void atJobsSteps(DocumentModel document, List<Diagnostic> diagnostics) {
-        document.model().jobs().forEach(job -> {
-            var jobWithString= checkUsesWith(job.uses(), job.with());
-            if (jobWithString != null) {
-                diagnostics.add(getDiagnostic(jobWithString, DiagnosticBuilderService.DiagnosticType.WorkflowRun));
-            }
-            job.steps().forEach(step -> {
-                var stepWithString = checkUsesWith(step.uses(), step.with());
-                if (stepWithString == null) return;
-                diagnostics.add(getDiagnostic(stepWithString, DiagnosticBuilderService.DiagnosticType.WorkflowRun));
-            });
-        });
-    }
 
     private Located<String> checkUsesWith(Located<String> uses, DocumentModel.With with) {
         if (uses.value().contains("actions/checkout")) {

@@ -18,6 +18,7 @@ public class UnsafeInputAssignmentDiagnosticProvider implements DiagnosticProvid
 
     @Override
     public List<Diagnostic> diagnose(DocumentModel document) {
+        logger.info("Diagnosing Unsafe Input Assignment");
         var diagnostics = new ArrayList<Diagnostic>();
         document.model().jobs().forEach( job -> {
             checkInputAssignment(diagnostics, job.with());

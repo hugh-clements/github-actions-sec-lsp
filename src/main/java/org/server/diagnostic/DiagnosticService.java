@@ -19,13 +19,14 @@ public class DiagnosticService {
 
     public DiagnosticService() {
         diagnosticProviders = List.of(
-                new RunnerHijackingDiagnostic(),
+                new RunnerHijackingDiagnosticProvider(),
                 new ActionReferencingDiagnosticProvider(),
                 new UnsafeInputAssignmentDiagnosticProvider(),
                 new WorkflowRunDiagnosticProvider(),
                 new PWNRequestDiagnosticProvider(),
                 new CodeInjectionDiagnosticProvider(),
-                new CommandExecutionDiagnosticProvider()
+                new CommandExecutionDiagnosticProvider(),
+                new OutdatedReferenceDiagnosticProvider()
         );
     }
 

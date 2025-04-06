@@ -1,24 +1,30 @@
 package org.server.diagnostic;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.lsp4j.Diagnostic;
 import org.server.document.DocumentModel;
 import org.server.document.Located;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
+import java.util.function.BiFunction;
 import java.util.regex.Pattern;
+
+import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
 
 public class DiagnosticUtils {
 
@@ -27,7 +33,7 @@ public class DiagnosticUtils {
     /**
      * Constant regex that matches the SHA commit hash
      */
-    public static final String commitHashRegex = "/\b([a-f0-9]{40})\b/";
+    public static final String commitHashRegex = "\\b[0-9a-f]{5,40}\\b";
 
     public static final String[] untrustedInputs = {
             "/github\\.event\\.issue\\.title/",
@@ -64,16 +70,30 @@ public class DiagnosticUtils {
      * @return Json object result fromm GitHub API
      */
     public static JsonObject getCommitFromHash(String owner, String repo, String commitHash) {
-        //TODO add handling of no internet connection
         var client = HttpClient.newHttpClient();
+        var uri = URI.create("https://api.github.com/repos/" + owner + "/" + repo + "/commits/" + commitHash);
         var request = HttpRequest.newBuilder()
                 .header("User-Agent", "Security-LSP")
-                .uri(URI.create(" https://api.github.com/repos/" + owner + "/" + repo + "/commits/" + commitHash)).GET().build();
+                .uri(uri).GET().build();
         try {
-            JsonElement element = new JsonPrimitive(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
-            return element.getAsJsonObject();
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                return new JsonObject();
+            }
+            var jsonElement = JsonParser.parseString(response.body());
+            return jsonElement.getAsJsonObject();
+        } catch (UnknownHostException e) {
+            logger.error("Network error: Unknown host", e);
+            return null;
+        } catch (ConnectException e) {
+            logger.error("Network error: Connection failed", e);
+            return null;
+        } catch (SocketTimeoutException e) {
+            logger.error("Network error: Timeout", e);
+            return null;
         } catch (Exception e) {
-            logger.error(e);
+            e.printStackTrace(System.err);
+            logger.error("Unexpected error", e);
             return null;
         }
     }
@@ -86,17 +106,31 @@ public class DiagnosticUtils {
      * @param repo  repository name
      * @return Json Object result fromm GitHub API
      */
-    public static JsonObject getRepoCommits(String owner, String repo) {
-        //TODO add handling of no internet connection
+    public static JsonArray getRepoCommits(String owner, String repo) {
         var client = HttpClient.newHttpClient();
+        var uri = URI.create("https://api.github.com/repos/" + owner + "/" + repo + "/commits?sha=main");
         var request = HttpRequest.newBuilder()
                 .header("User-Agent", "Security-LSP")
-                .uri(URI.create(" https://api.github.com/repos/" + owner + "/" + repo + "/commits")).GET().build();
+                .uri(uri).GET().build();
         try {
-            JsonElement element = new JsonPrimitive(client.send(request, HttpResponse.BodyHandlers.ofString()).body());
-            return element.getAsJsonObject();
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                return new JsonArray();
+            }
+            var jsonElement = JsonParser.parseString(response.body());
+            return jsonElement.getAsJsonArray();
+        } catch (UnknownHostException e) {
+            logger.error("Network error: Unknown host", e);
+            return null;
+        } catch (ConnectException e) {
+            logger.error("Network error: Connection failed", e);
+            return null;
+        } catch (SocketTimeoutException e) {
+            logger.error("Network error: Timeout", e);
+            return null;
         } catch (Exception e) {
-            logger.error(e);
+            e.printStackTrace(System.err);
+            logger.error("Unexpected error", e);
             return null;
         }
     }
@@ -104,18 +138,15 @@ public class DiagnosticUtils {
 
     /**
      * Helper method that returns if the current date is older than 3 months compared to the latest date
-     *
      * @param current date
      * @param latest  date
      * @return true if the difference is 3 months or more
      */
-    public static Boolean olderName3Months(String current, String latest) {
-        DateTimeFormatter formatter =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
-        LocalDateTime currentDate = LocalDateTime.parse(current, formatter);
-        LocalDateTime latestDate = LocalDateTime.parse(latest, formatter);
+    public static Boolean olderThan3Months(String current, String latest) {
+        LocalDateTime currentDate = OffsetDateTime.parse(current).toLocalDateTime();
+        LocalDateTime latestDate = OffsetDateTime.parse(latest).toLocalDateTime();
         Duration between = Duration.between(currentDate, latestDate);
-        return between.compareTo(Duration.ofDays(30)) >= 0;
+        return between.compareTo(Duration.ofDays(90)) >= 0;
     }
 
     public static List<Located<String>> getWithStrings(DocumentModel.With with) {
@@ -132,6 +163,22 @@ public class DiagnosticUtils {
         var matcher = pattern.matcher(input);
         if (!matcher.find()) return null;
         return matcher.group(1);
+    }
+
+    public static void atJobsSteps(
+            BiFunction<Located<String>, DocumentModel.With, Located<String>> checkUsesWith,
+            DocumentModel document, List<Diagnostic> diagnostics) {
+        document.model().jobs().forEach(job -> {
+            var jobWithString = checkUsesWith.apply(job.uses(), job.with());
+            if (jobWithString != null) {
+                diagnostics.add(getDiagnostic(jobWithString, DiagnosticBuilderService.DiagnosticType.WorkflowRun));
+            }
+            job.steps().forEach(step -> {
+                var stepWithString = checkUsesWith.apply(step.uses(), step.with());
+                if (stepWithString == null) return;
+                diagnostics.add(getDiagnostic(stepWithString, DiagnosticBuilderService.DiagnosticType.WorkflowRun));
+            });
+        });
     }
 }
 

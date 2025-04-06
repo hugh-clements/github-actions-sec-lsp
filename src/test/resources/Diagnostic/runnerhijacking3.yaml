@@ -1,0 +1,33 @@
+name: Runner Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: [ubuntu-latest, self-hosted]  # This specifies the runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Display system info
+        run: uname -a
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          sudo apt-get update && sudo apt-get install -y curl jq
+
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          ./run-tests.sh  # Replace with your actual test command
+
+      - name: Build project
+        run: |
+          echo "Building project..."
+          ./build.sh  # Replace with your actual build command

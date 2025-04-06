@@ -12,7 +12,11 @@ public class UtilsTest {
 
 
     public static Located<DocumentModel> getModel(String stringPath) throws IOException {
-        var toParse = Files.readString(Path.of(stringPath));
+        Path path = Path.of(stringPath);
+        if (!Files.exists(path)) {
+            throw new IOException("File does not exist: " + stringPath);
+        }
+        var toParse = Files.readString(path);
         var modelConstructorService = new ModelConstructorService();
         return modelConstructorService.modelConstructor("yaml","github/workflows/",toParse);
     }

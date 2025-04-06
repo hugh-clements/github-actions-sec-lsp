@@ -1,5 +1,7 @@
 package org.server.diagnostic;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
 import org.server.document.DocumentModel;
 import org.server.document.Located;
@@ -7,32 +9,23 @@ import org.server.document.Located;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
+import static org.server.diagnostic.DiagnosticUtils.atJobsSteps;
 
 public class CodeInjectionDiagnosticProvider implements DiagnosticProvider {
 
+    static Logger logger = LogManager.getLogger(CodeInjectionDiagnosticProvider.class);
+
     @Override
     public List<Diagnostic> diagnose(DocumentModel document) {
+        logger.info("Diagnosing Code Injection");
         var diagnostics = new ArrayList<Diagnostic>();
-        atJobSteps(document, diagnostics);
+        atJobsSteps(this::checkUsesWith,document, diagnostics);
         return diagnostics;
     }
 
-    private void atJobSteps(DocumentModel document, List<Diagnostic> diagnostics) {
-        document.model().jobs().forEach(job -> {
-            var jobWithString= checkUsesWith(job.uses(), job.with());
-            if (jobWithString != null) {
-                diagnostics.add(getDiagnostic(jobWithString, DiagnosticBuilderService.DiagnosticType.WorkflowRun));
-            }
-            job.steps().forEach(step -> {
-                var stepWithString = checkUsesWith(step.uses(), step.with());
-                if (stepWithString == null) return;
-                diagnostics.add(getDiagnostic(stepWithString, DiagnosticBuilderService.DiagnosticType.WorkflowRun));
-            });
-        });
-    }
 
     private Located<String> checkUsesWith(Located<String> uses, DocumentModel.With with) {
+        //TODO deal with inputs here
         return null;
     }
 }
