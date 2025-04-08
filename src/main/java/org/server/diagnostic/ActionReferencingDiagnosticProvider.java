@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
-import static org.server.diagnostic.DiagnosticUtils.commitHashRegex;
+import static org.server.diagnostic.DiagnosticUtils.*;
 
 public class ActionReferencingDiagnosticProvider implements DiagnosticProvider {
 
@@ -35,6 +35,7 @@ public class ActionReferencingDiagnosticProvider implements DiagnosticProvider {
             case String b when b.contains("./") -> {}
             default -> {
                 var split = value.split("[/@]");
+                if (split.length < 2) return;
                 if (!split[split.length-1].matches(commitHashRegex)) {
                     diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
                 } else {
@@ -54,7 +55,13 @@ public class ActionReferencingDiagnosticProvider implements DiagnosticProvider {
     }
 
     public static void checkRepojackable(List<Diagnostic> diagnostics, Located<String> uses) {
-
+        if (uses == null) return;
+        var usesAction = uses.value().split("[/@]");
+        if (usesAction.length < 2) return;
+        var statusCode = getRepoStatus(usesAction[0],usesAction[1]);
+        if ((statusCode >= 300 && statusCode < 400) || statusCode == 404) {
+            diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.Repojackable));
+        }
     }
 
 }

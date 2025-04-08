@@ -26,6 +26,9 @@ import java.util.regex.Pattern;
 
 import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
 
+/**
+ * Helper class for diagnostic providers to avoid repeating code
+ */
 public class DiagnosticUtils {
 
     static Logger logger = LogManager.getLogger(DiagnosticUtils.class);
@@ -135,6 +138,37 @@ public class DiagnosticUtils {
         }
     }
 
+    /**
+     * Helper method to get the status code from a repository request
+     * @param owner repo owner
+     * @param repo name
+     * @return status code
+     */
+    public static int getRepoStatus(String owner, String repo) {
+        var client = HttpClient.newHttpClient();
+        var uri = URI.create("https://api.github.com/repos/" + owner + "/" + repo);
+        var request = HttpRequest.newBuilder()
+                .header("User-Agent", "Security-LSP")
+                .uri(uri).GET().build();
+        try {
+            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode();
+        } catch (UnknownHostException e) {
+            logger.error("Network error: Unknown host", e);
+            return 0;
+        } catch (ConnectException e) {
+            logger.error("Network error: Connection failed", e);
+            return 0;
+        } catch (SocketTimeoutException e) {
+            logger.error("Network error: Timeout", e);
+            return 0;
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            logger.error("Unexpected error", e);
+            return 0;
+        }
+    }
+
 
     /**
      * Helper method that returns if the current date is older than 3 months compared to the latest date
@@ -149,6 +183,11 @@ public class DiagnosticUtils {
         return between.compareTo(Duration.ofDays(90)) >= 0;
     }
 
+    /**
+     * Helper method that returns all Strings present inside a With block
+     * @param with With block from the DocumentModel
+     * @return Strings
+     */
     public static List<Located<String>> getWithStrings(DocumentModel.With with) {
         var stringList = new ArrayList<Located<String>>();
         stringList.addAll(with.values());
@@ -158,6 +197,11 @@ public class DiagnosticUtils {
         return stringList;
     }
 
+    /**
+     * Helper method to extract a String from inside ${{ }}
+     * @param input String to extract from
+     * @return extracted String
+     */
     public static String getBetweenBraces(String input) {
         Pattern pattern = Pattern.compile("\\$\\{\\{(.*?)}}");
         var matcher = pattern.matcher(input);
@@ -165,18 +209,25 @@ public class DiagnosticUtils {
         return matcher.group(1);
     }
 
+    /**
+     * Helper method to apply a function at each Job and Step
+     * @param checkUsesWith method that takes in the Uses and With blocks
+     * @param document documentModel containing Jobs and Steps
+     * @param diagnosticType type of diagnostic to create
+     * @param diagnostics list of diagnostics from Jobs and Steps
+     */
     public static void atJobsSteps(
             BiFunction<Located<String>, DocumentModel.With, Located<String>> checkUsesWith,
-            DocumentModel document, List<Diagnostic> diagnostics) {
+            DocumentModel document, List<Diagnostic> diagnostics, DiagnosticBuilderService.DiagnosticType diagnosticType) {
         document.model().jobs().forEach(job -> {
             var jobWithString = checkUsesWith.apply(job.uses(), job.with());
             if (jobWithString != null) {
-                diagnostics.add(getDiagnostic(jobWithString, DiagnosticBuilderService.DiagnosticType.WorkflowRun));
+                diagnostics.add(getDiagnostic(jobWithString, diagnosticType));
             }
             job.steps().forEach(step -> {
                 var stepWithString = checkUsesWith.apply(step.uses(), step.with());
                 if (stepWithString == null) return;
-                diagnostics.add(getDiagnostic(stepWithString, DiagnosticBuilderService.DiagnosticType.WorkflowRun));
+                diagnostics.add(getDiagnostic(stepWithString, diagnosticType));
             });
         });
     }

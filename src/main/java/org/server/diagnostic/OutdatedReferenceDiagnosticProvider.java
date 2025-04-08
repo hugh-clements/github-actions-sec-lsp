@@ -18,9 +18,7 @@ public class OutdatedReferenceDiagnosticProvider implements DiagnosticProvider {
         var diagnostics = new ArrayList<Diagnostic>();
         doc.model().jobs().forEach(job -> {
            checkOutdatedReference(diagnostics,job.uses());
-           job.steps().forEach(step -> {
-               checkOutdatedReference(diagnostics,step.uses());
-           });
+           job.steps().forEach(step -> checkOutdatedReference(diagnostics,step.uses()));
         });
         return diagnostics;
     }

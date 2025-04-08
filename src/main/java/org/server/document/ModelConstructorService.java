@@ -186,6 +186,7 @@ public class ModelConstructorService {
         }
         return builder.build();
     }
+
     /** Parsing ScalarNode Event with no arguments **/
     public List<DocumentModel.Event> parseSimpleEvent(ScalarNode eventNode) {
         logger.info("Parsing simple Event");
@@ -271,6 +272,7 @@ public class ModelConstructorService {
             default -> throw new IllegalArgumentException("Unexpected Node type when parsing permissions");
         }
     }
+
     /** Parsing ScalarNode of permissions **/
     public Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> parseScalarPermissions(String permissionLevel) {
         logger.info("Parsing scalar permissions");
@@ -286,6 +288,7 @@ public class ModelConstructorService {
         }
         return map;
     }
+
     /** Parsing MappingNode of permissions **/
     public Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> parseMappingPermissions(MappingNode mappingNode) {
         logger.info("Parsing mapping permissions");
@@ -326,6 +329,7 @@ public class ModelConstructorService {
         return new DocumentModel.Defaults(shell,working_dir);
     }
 
+    /** Parsing "steps" **/
     private List<DocumentModel.Step> parseSteps(Node stepsNode) {
         logger.info("Parsing steps");
         var steps = new ArrayList<DocumentModel.Step>();
@@ -359,6 +363,7 @@ public class ModelConstructorService {
         }
     }
 
+    /** Parsing the "with" keyword **/
     private DocumentModel.With parseWith(Node withNode) {
         logger.info("Parsing with");
         var builder = DocumentModel.With.builder();
@@ -394,6 +399,7 @@ public class ModelConstructorService {
         return secrets;
     }
 
+    /** Parsing the "secrets" keyword in jobs */
     private String parsePassSecret(Node secretPassNode) {
         return switch (secretPassNode) {
             case ScalarNode s -> s.getValue();

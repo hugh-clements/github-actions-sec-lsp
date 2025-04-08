@@ -18,10 +18,18 @@ public class Start {
 
     private static final Logger logger = LogManager.getLogger(Start.class);
 
+
     static void main() throws ExecutionException, InterruptedException {
         startServer(System.in, System.out);
     }
 
+    /**
+     * Method to initialise and start the language server
+     * @param in to listen to messages
+     * @param out to output messages
+     * @throws ExecutionException exception
+     * @throws InterruptedException exception
+     */
     public static void startServer(InputStream in, OutputStream out) throws ExecutionException, InterruptedException {
         logger.info("Starting server...");
         LanguageServer server = new LanguageServer();

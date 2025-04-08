@@ -11,12 +11,17 @@ import java.util.List;
 
 import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
 
+/**
+ * Service that handles the diagnosis of issues in the model
+ */
 public class DiagnosticService {
 
     static Logger logger = LogManager.getLogger(DiagnosticService.class);
     private final List<DiagnosticProvider> diagnosticProviders;
 
-
+    /**
+     * Instantiating a diagnostic provider for each rule
+     */
     public DiagnosticService() {
         diagnosticProviders = List.of(
                 new RunnerHijackingDiagnosticProvider(),
@@ -47,7 +52,7 @@ public class DiagnosticService {
     }
 
     /**
-     * Helper method to global diagnostics
+     * Helper method to get global or file-scoped diagnostics
      * @param locatedDocument documentModel with locations
      * @return list of global diagnostics
      */

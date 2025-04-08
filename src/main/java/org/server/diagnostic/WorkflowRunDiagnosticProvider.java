@@ -22,7 +22,7 @@ public class WorkflowRunDiagnosticProvider implements DiagnosticProvider {
         var diagnostics = new ArrayList<Diagnostic>();
         if (document.model().on().workflowEvents()
                 .stream().anyMatch(n -> n.workflowRun() != null)) {
-            atJobsSteps(this::checkUsesWith,document, diagnostics);
+            atJobsSteps(this::checkUsesWith,document, diagnostics, DiagnosticBuilderService.DiagnosticType.WorkflowRun);
         }
         return diagnostics;
     }

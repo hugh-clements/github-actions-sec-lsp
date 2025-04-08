@@ -24,7 +24,7 @@ public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
         var diagnostics = new ArrayList<Diagnostic>();
         if (document.model().on().events()
                 .stream().anyMatch(n -> n.eventName().equals("pull_request_target"))) {
-            atJobsSteps(this::checkUsesWith,document, diagnostics);
+            atJobsSteps(this::checkUsesWith,document, diagnostics, DiagnosticBuilderService.DiagnosticType.PWNRequest);
         }
         return diagnostics;
     }
