@@ -19,8 +19,14 @@ public class Start {
     private static final Logger logger = LogManager.getLogger(Start.class);
 
 
-    static void main() throws ExecutionException, InterruptedException {
-        startServer(System.in, System.out);
+    public static void main(String[] args) throws Exception {
+        System.err.println("testtsettse");
+        logger.info("Starting app...");
+        try {
+            startServer(System.in, System.out);
+        } catch (Exception e) {
+            logger.error(e);
+        }
     }
 
     /**
