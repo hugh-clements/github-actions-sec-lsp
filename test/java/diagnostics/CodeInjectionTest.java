@@ -1,25 +1,26 @@
 package diagnostics;
 
 import org.junit.jupiter.api.Test;
-import org.server.diagnostic.OutdatedReferenceDiagnosticProvider;
+import org.server.diagnostic.CodeInjectionDiagnosticProvider;
+
 import java.io.IOException;
 
 import static diagnostics.UtilsTest.getModel;
 
-public class OutdatedReferenceTest {
+public class CodeInjectionTest {
 
-    private static final OutdatedReferenceDiagnosticProvider diagnosticProvider = new OutdatedReferenceDiagnosticProvider();
+    private static final CodeInjectionDiagnosticProvider diagnosticProvider = new CodeInjectionDiagnosticProvider();
 
     @Test
     public void testNoIssues() throws IOException {
-        var model = getModel("src/test/resources/Diagnostic/outdatedreference1.yaml");
+        var model = getModel("src/test/resources/Diagnostic/codeinjection1.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
         assert diagnostics.isEmpty();
     }
 
     @Test
     public void testSingleIssue() throws IOException {
-        var model = getModel("src/test/resources/Diagnostic/outdatedreference2.yaml");
+        var model = getModel("src/test/resources/Diagnostic/codeinjection2.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
 
     }

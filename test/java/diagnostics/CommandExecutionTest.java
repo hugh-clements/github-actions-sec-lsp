@@ -1,7 +1,6 @@
 package diagnostics;
 
 import org.junit.jupiter.api.Test;
-import org.server.diagnostic.CodeInjectionDiagnosticProvider;
 import org.server.diagnostic.CommandExecutionDiagnosticProvider;
 
 import java.io.IOException;
@@ -10,7 +9,7 @@ import static diagnostics.UtilsTest.getModel;
 
 public class CommandExecutionTest {
 
-    private static final CommandExecutionDiagnosticProvider diagnosticProvider = new CommandExecutionDiagnosticProvider()#;
+    private static final CommandExecutionDiagnosticProvider diagnosticProvider = new CommandExecutionDiagnosticProvider();
 
     @Test
     public void testNoIssues() throws IOException {
