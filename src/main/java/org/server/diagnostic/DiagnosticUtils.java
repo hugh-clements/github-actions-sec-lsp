@@ -3,6 +3,7 @@ package org.server.diagnostic;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
@@ -239,7 +240,7 @@ public class DiagnosticUtils {
      * @param input string to check
      * @return true if the input string does match the untrusted inputs
      */
-    public static Boolean isUnsafeInput(String input) {
+    public static boolean isUnsafeInput(String input) {
         return Arrays.stream(untrustedInputs).anyMatch(untrustedInput -> Pattern.matches(untrustedInput, input));
     }
 }

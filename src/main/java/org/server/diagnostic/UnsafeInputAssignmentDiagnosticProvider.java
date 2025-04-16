@@ -1,10 +1,10 @@
 package org.server.diagnostic;
 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
 import org.server.document.DocumentModel;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +30,9 @@ public class UnsafeInputAssignmentDiagnosticProvider implements DiagnosticProvid
        getWithStrings(with).forEach( withString -> {
            var betweenBraces = getBetweenBraces(withString.value());
            if (betweenBraces == null) return;
-           if (isUnsafeInput(betweenBraces)) {
+           if (isUnsafeInput(betweenBraces))
                diagnostics.add(getDiagnostic(withString, DiagnosticBuilderService.DiagnosticType.UNSAFE_INPUT_ASSIGNMENT));
-           }
        });
     }
+
 }

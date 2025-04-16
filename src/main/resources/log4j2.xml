@@ -2,10 +2,10 @@
 <Configuration status="WARN">
     <Properties>
         <!-- Generate a unique timestamped filename per run -->
-        <Property name="logfileName">logs/server-${date:yyyy-MM-dd-HH-mm-ss}.log</Property>
+        <Property name="logfileName">logs/server-${date:yyyy-MM-dd::HH:mm:ss}.log</Property>
     </Properties>
 
-    <Appenders>
+    <Appenders>%
         <!-- File appender with a unique filename per run -->
         <File name="FileAppender" fileName="${logfileName}">
             <PatternLayout>
@@ -17,7 +17,7 @@
         <Console name="ErrorConsole" target="SYSTEM_ERR">
             <PatternLayout>
                 <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</Pattern>
-            </PatternLayout>
+            </PatternLayout>%
         </Console>
     </Appenders>
 
