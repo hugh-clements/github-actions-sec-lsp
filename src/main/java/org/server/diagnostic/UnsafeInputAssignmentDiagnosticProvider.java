@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
-import static org.server.diagnostic.DiagnosticUtils.getBetweenBraces;
-import static org.server.diagnostic.DiagnosticUtils.getWithStrings;
+import static org.server.diagnostic.DiagnosticUtils.*;
 
 public class UnsafeInputAssignmentDiagnosticProvider implements DiagnosticProvider{
 
@@ -31,8 +30,9 @@ public class UnsafeInputAssignmentDiagnosticProvider implements DiagnosticProvid
        getWithStrings(with).forEach( withString -> {
            var betweenBraces = getBetweenBraces(withString.value());
            if (betweenBraces == null) return;
-           //TODO figure out what is an unsafe input and add diagnostic if that is the case
-           diagnostics.add(getDiagnostic(withString, DiagnosticBuilderService.DiagnosticType.UnsafeInputAssignment));
-       } );
+           if (isUnsafeInput(betweenBraces)) {
+               diagnostics.add(getDiagnostic(withString, DiagnosticBuilderService.DiagnosticType.UNSAFE_INPUT_ASSIGNMENT));
+           }
+       });
     }
 }

@@ -61,15 +61,15 @@ public class DiagnosticService {
         var list = new ArrayList<Diagnostic>();
         //First checking if the Document is in yaml
         if (!document.lang().equals("yaml")) {
-            list.add(getDiagnostic(locatedDocument,DiagnosticBuilderService.DiagnosticType.IncorrectLang));
+            list.add(getDiagnostic(locatedDocument,DiagnosticBuilderService.DiagnosticType.INCORRECT_LANG));
         }
         //Check if document is valid yaml
         if (document.model() == null) {
-            list.add(getDiagnostic(locatedDocument, DiagnosticBuilderService.DiagnosticType.NotValidYAML));
+            list.add(getDiagnostic(locatedDocument, DiagnosticBuilderService.DiagnosticType.NOT_VALID_YAML));
         }
         //Check if document is in correct directory
         if (document.documentURI().contains("github/workflows/")) {
-            list.add(getDiagnostic(locatedDocument,DiagnosticBuilderService.DiagnosticType.IncorrectDirectory));
+            list.add(getDiagnostic(locatedDocument,DiagnosticBuilderService.DiagnosticType.INCORRECT_DIRECTORY));
         }
         return list;
     }

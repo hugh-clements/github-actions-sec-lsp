@@ -23,7 +23,7 @@ public class UnsafeInputTest {
     public void testSingleIssue() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/unsafeinput2.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
-        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.WorkflowRun.toString()));
+        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.WORKFLOW_RUN.toString()));
     }
 }
 

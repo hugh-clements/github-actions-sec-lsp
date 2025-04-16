@@ -36,8 +36,8 @@ public class ActionReferencingDiagnosticProvider implements DiagnosticProvider {
             default -> {
                 var split = value.split("[/@]");
                 if (split.length < 2) return;
-                if (!split[split.length-1].matches(commitHashRegex)) {
-                    diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.UnpinnedAction));
+                if (!split[split.length-1].matches(COMMIT_HASH_REGEX)) {
+                    diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.UNPINNED_ACTION));
                 } else {
                     diagnostics.addAll(getRepojackableDiagnostic(document));
                 }
@@ -60,7 +60,7 @@ public class ActionReferencingDiagnosticProvider implements DiagnosticProvider {
         if (usesAction.length < 2) return;
         var statusCode = getRepoStatus(usesAction[0],usesAction[1]);
         if ((statusCode >= 300 && statusCode < 400) || statusCode == 404) {
-            diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.Repojackable));
+            diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.REPOJACKABLE));
         }
     }
 

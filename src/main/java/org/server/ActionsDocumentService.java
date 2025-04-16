@@ -14,28 +14,19 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Implementation of TextDocumentService that is responsible for Document sync
  */
-public class DocumentService implements TextDocumentService {
+public class ActionsDocumentService implements TextDocumentService {
 
-    private final LanguageServer languageServer;
     private Located<DocumentModel> documentModel;
     private final ModelConstructorService modelConstructorService;
     private final DiagnosticService diagnosticService;
 
     Logger logger = LogManager.getLogger(getClass());
 
-    public DocumentService(LanguageServer languageServer) {
-        this.languageServer = languageServer;
+    public ActionsDocumentService() {
         modelConstructorService = new ModelConstructorService();
         diagnosticService = new DiagnosticService();
     }
 
-    @Override
-    public CompletableFuture<Hover> hover(HoverParams params) {
-        logger.info("hover");
-        return TextDocumentService.super.hover(params);
-    }
-
-    //TODO i dont think i need this
     @Override
     public CompletableFuture<DocumentDiagnosticReport> diagnostic(DocumentDiagnosticParams params) {
         logger.info("diagnostic");
@@ -55,7 +46,7 @@ public class DocumentService implements TextDocumentService {
             logger.error("Failed to construct document model on open", e);
         }
 
-        CompletableFuture.runAsync(() -> languageServer.client.publishDiagnostics(
+        CompletableFuture.runAsync(() -> ActionsLanguageServer.getClient().publishDiagnostics(
                 new PublishDiagnosticsParams(didOpenTextDocumentParams.getTextDocument().getUri(),
                         diagnosticService.diagnose(documentModel))
         ));
@@ -74,7 +65,7 @@ public class DocumentService implements TextDocumentService {
             logger.error("Failed to construct document model on change", e);
         }
 
-        CompletableFuture.runAsync(() -> languageServer.client.publishDiagnostics(
+        CompletableFuture.runAsync(() -> ActionsLanguageServer.getClient().publishDiagnostics(
                 new PublishDiagnosticsParams(didChangeTextDocumentParams.getTextDocument().getUri(),
                         diagnosticService.diagnose(documentModel))
         ));

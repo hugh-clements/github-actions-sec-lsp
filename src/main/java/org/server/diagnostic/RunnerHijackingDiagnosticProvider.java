@@ -20,8 +20,8 @@ public class RunnerHijackingDiagnosticProvider implements DiagnosticProvider{
         var diagnostics = new ArrayList<Diagnostic>();
         document.model().jobs().forEach(job -> job.runsOn().forEach(runnerLocated -> {
             //Checking if any self-hosted runners are being used
-            if (runnerLocated.value() != DocumentModel.Runner.self_hosted) return;
-            diagnostics.add(getDiagnostic(runnerLocated, DiagnosticBuilderService.DiagnosticType.RunnerHijacker));
+            if (runnerLocated.value() != DocumentModel.Runner.SELF_HOSTED) return;
+            diagnostics.add(getDiagnostic(runnerLocated, DiagnosticBuilderService.DiagnosticType.RUNNER_HIJACKER));
         }));
         return diagnostics;
     }

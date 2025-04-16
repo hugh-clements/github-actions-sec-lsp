@@ -149,6 +149,7 @@ public class ModelConstructorService {
                         case "inputs" -> callBuilder.input(n);
                         case "outputs" -> callBuilder.output(n);
                         case "secrets" -> callBuilder.secrets(parseSecrets(n));
+                        default -> throw new IllegalArgumentException("Failed to parse 'WorkflowEvent' node, unexpected node type");
                     }
                 });
                 builder.workflowCall(callBuilder.build());
@@ -165,6 +166,7 @@ public class ModelConstructorService {
                         case "types" -> runBuilder.types(getStringFromSequenceOrScalar(n));
                         case "branches" -> runBuilder.branches(n);
                         case "branches-ignore" -> runBuilder.branchesIgnore(n);
+                        default -> throw new IllegalArgumentException("Failed to parse 'WorkflowEvent' node, unexpected node type");
                     }
                 });
                 builder.workflowRun(runBuilder.build());
@@ -176,13 +178,15 @@ public class ModelConstructorService {
                     break;
                 }
                 mappingToMap(getSingletonMapValue((MappingNode) node)).forEach( (s, n) -> {
-                    switch (s) {
-                        case "input" -> dispatchBuilder.input(n);
-                        case "output" -> dispatchBuilder.output(n);
+                    if (s.equals("input")) {
+                        dispatchBuilder.input(n);
+                    } else if (s.equals("output")) {
+                        dispatchBuilder.output(n);
                     }
                 });
                 builder.workflowDispatch(dispatchBuilder.build());
             }
+            default -> throw new IllegalArgumentException("Failed to parse 'WorkflowEvent' node, unexpected node type");
         }
         return builder.build();
     }
@@ -212,10 +216,11 @@ public class ModelConstructorService {
         logger.info("Parsing concurrency");
         var builder = DocumentModel.Concurrency.builder();
         mappingToMap(concurrencyNode).forEach( (s, n) -> {
-           switch (s) {
-               case "group" -> builder.group(((ScalarNode)n).getValue());
-               case "cancel-in-progress" -> builder.cancelInProgress(Boolean.parseBoolean(((ScalarNode)n).getValue()));
-           }
+            if (s.equals("group")) {
+                builder.group(((ScalarNode) n).getValue());
+            } else if (s.equals("cancel-in-progress")) {
+                builder.cancelInProgress(Boolean.parseBoolean(((ScalarNode) n).getValue()));
+            }
         });
         return builder.build();
     }
@@ -235,7 +240,7 @@ public class ModelConstructorService {
                         jobBuilder.permissions(parsePermissions(value));
                     case "if" -> jobBuilder.condition(((ScalarNode)value).getValue());
                     case "needs" -> {
-                        if (value instanceof SequenceNode) jobBuilder.needs(parseToStringList((SequenceNode) value));
+                        if (value instanceof SequenceNode sequenceNode) jobBuilder.needs(parseToStringList(sequenceNode));
                         if (value instanceof ScalarNode) jobBuilder.needs(Collections.singletonList(parseToString(value)));
                     }
                     case "runs-on" -> jobBuilder.runsOn(parseRunners(value));
@@ -309,13 +314,15 @@ public class ModelConstructorService {
     private List<Located<DocumentModel.Runner>> parseRunners(Node runnerNode) {
         logger.info("Parsing runners");
         var runners = new ArrayList<Located<DocumentModel.Runner>>();
-        if (runnerNode instanceof ScalarNode) {
-            runners.add(locate(runnerNode,DocumentModel.Runner.toRunner(((ScalarNode) runnerNode).getValue())));
-        } else if (runnerNode instanceof SequenceNode) {
-            ((SequenceNode) runnerNode).getValue().forEach(runner -> runners.add(locate(runnerNode,DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue()))));
-        } else {
-            logger.error("Failed Node: {}", runnerNode);
-            throw new IllegalArgumentException("Failed to parse Runners, Node is not SequenceNode or ScalarNode");
+        switch (runnerNode) {
+            case ScalarNode scalarNode ->
+                    runners.add(locate(runnerNode, DocumentModel.Runner.toRunner(scalarNode.getValue())));
+            case SequenceNode sequenceNode ->
+                    sequenceNode.getValue().forEach(runner -> runners.add(locate(runnerNode, DocumentModel.Runner.toRunner(((ScalarNode) runner).getValue()))));
+            case null, default -> {
+                logger.error("Failed Node: {}", runnerNode);
+                throw new IllegalArgumentException("Failed to parse Runners, Node is not SequenceNode or ScalarNode");
+            }
         }
         return runners;
     }
@@ -325,8 +332,8 @@ public class ModelConstructorService {
         logger.info("Parsing defaults");
         var tupleList = ((MappingNode) defaultsNode.getValue().getFirst().getValueNode()).getValue();
         var shell = ((ScalarNode) tupleList.getFirst().getValueNode()).getValue();
-        var working_dir = ((ScalarNode) tupleList.getLast().getValueNode()).getValue();
-        return new DocumentModel.Defaults(shell,working_dir);
+        var workingDir = ((ScalarNode) tupleList.getLast().getValueNode()).getValue();
+        return new DocumentModel.Defaults(shell,workingDir);
     }
 
     /** Parsing "steps" **/
@@ -389,9 +396,10 @@ public class ModelConstructorService {
         mappingToMap(secretNode).forEach( (secretName, secretValue) -> {
             var builder = SecretsAndPermissions.Secret.builder();
             mappingToMap(secretValue).forEach( (arg, value) -> {
-                switch (arg) {
-                    case "required" -> builder.required(Boolean.parseBoolean(parseToString(value)));
-                    case "description" -> builder.description(parseToString(value));
+                if (arg.equals("required")) {
+                    builder.required(Boolean.parseBoolean(parseToString(value)));
+                } else if (arg.equals("description")) {
+                    builder.description(parseToString(value));
                 }
             });
             secrets.put(secretName, builder.build());
@@ -489,10 +497,10 @@ public class ModelConstructorService {
      */
     private List<String> getStringFromSequenceOrScalar(Node node) {
         var list = new ArrayList<String>();
-        if (node instanceof SequenceNode) {
-            ((SequenceNode)node).getValue().forEach(n -> list.add(((ScalarNode) n).getValue()));
-        } else if (node instanceof ScalarNode) {
-            list.add(((ScalarNode) node).getValue());
+        if (node instanceof SequenceNode sequenceNode) {
+            sequenceNode.getValue().forEach(n -> list.add(((ScalarNode) n).getValue()));
+        } else if (node instanceof ScalarNode scalarNode) {
+            list.add(scalarNode.getValue());
         }
         return list;
     }

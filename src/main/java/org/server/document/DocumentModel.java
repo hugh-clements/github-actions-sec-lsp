@@ -104,37 +104,37 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     ) {}
 
     public enum Runner {
-        self_hosted,
-        ubuntu_latest,
-        ubuntu_24_04,
-        ubuntu_22_04,
-        ubuntu_20_04,
-        windows_2025,
-        windows_2022,
-        windows_2019,
-        ubuntu_24_04_arm,
-        ubuntu_22_04_arm,
-        macos_13,
-        macos_14,
-        macos_15,
-        macos_latest;
+        SELF_HOSTED,
+        UBUNTU_LATEST,
+        UBUNTU_24_04,
+        UBUNTU_22_04,
+        UBUNTU_20_04,
+        WINDOWS_2025,
+        WINDOWS_2022,
+        WINDOWS_2019,
+        UBUNTU_24_04_ARM,
+        UBUNTU_22_04_ARM,
+        MACOS_13,
+        MACOS_14,
+        MACOS_15,
+        MACOS_LATEST;
 
         public static Runner toRunner(String stringRunner) {
             return switch (stringRunner) {
-                case "self-hosted" -> self_hosted;
-                case "ubuntu-latest" -> ubuntu_latest;
-                case "ubuntu-24-04" -> ubuntu_24_04;
-                case "ubuntu-22-04" -> ubuntu_22_04;
-                case "ubuntu_20_04" -> ubuntu_20_04;
-                case "windows-2025" -> windows_2025;
-                case "windows-2022" -> windows_2022;
-                case "windows-2019" -> windows_2019;
-                case "ubuntu-24-04-arm" -> ubuntu_24_04_arm;
-                case "ubuntu-22-04-arm" -> ubuntu_22_04_arm;
-                case "macos-13" -> macos_13;
-                case "macos-14" -> macos_14;
-                case "macos-15" -> macos_15;
-                case "macos-latest" -> macos_latest;
+                case "self-hosted" -> SELF_HOSTED;
+                case "ubuntu-latest" -> UBUNTU_LATEST;
+                case "ubuntu-24-04" -> UBUNTU_24_04;
+                case "ubuntu-22-04" -> UBUNTU_22_04;
+                case "ubuntu_20_04" -> UBUNTU_20_04;
+                case "windows-2025" -> WINDOWS_2025;
+                case "windows-2022" -> WINDOWS_2022;
+                case "windows-2019" -> WINDOWS_2019;
+                case "ubuntu-24-04-arm" -> UBUNTU_24_04_ARM;
+                case "ubuntu-22-04-arm" -> UBUNTU_22_04_ARM;
+                case "macos-13" -> MACOS_13;
+                case "macos-14" -> MACOS_14;
+                case "macos-15" -> MACOS_15;
+                case "macos-latest" -> MACOS_LATEST;
                 default -> {
                     logger.info(stringRunner);
                     throw new IllegalArgumentException("Unsupported Runner: " + stringRunner);

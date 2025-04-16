@@ -23,6 +23,6 @@ public class WorkflowRunTest {
     public void testSingleIssue() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/workflowrun2.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
-        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.WorkflowRun.toString()));
+        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.WORKFLOW_RUN.toString()));
     }
 }

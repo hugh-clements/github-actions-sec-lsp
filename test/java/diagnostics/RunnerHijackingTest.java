@@ -24,7 +24,7 @@ public class RunnerHijackingTest {
         var model = getModel("src/test/resources/Diagnostic/runnerhijacking2.yaml");
         var diagnostics = diagnosticService.diagnose(model.value());
         assert diagnostics.size() == 1;
-        assert diagnostics.getFirst().getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.RunnerHijacker.toString());
+        assert diagnostics.getFirst().getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.RUNNER_HIJACKER.toString());
 
     }
 
@@ -34,7 +34,7 @@ public class RunnerHijackingTest {
         var model = getModel("src/test/resources/Diagnostic/runnerhijacking3.yaml");
         var diagnostics = diagnosticService.diagnose(model.value());
         assert diagnostics.size() == 1;
-        assert diagnostics.getFirst().getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.RunnerHijacker.toString());
+        assert diagnostics.getFirst().getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.RUNNER_HIJACKER.toString());
     }
 
 
@@ -43,7 +43,7 @@ public class RunnerHijackingTest {
         var model = getModel("src/test/resources/Diagnostic/runnerhijacking4.yaml");
         var diagnostics = diagnosticService.diagnose(model.value());
         assert diagnostics.size() == 2;
-        assert diagnostics.getFirst().getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.RunnerHijacker.toString());
+        assert diagnostics.getFirst().getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.RUNNER_HIJACKER.toString());
 
     }
 }

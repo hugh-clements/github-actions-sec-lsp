@@ -29,7 +29,7 @@ public class CommandExecutionDiagnosticProvider implements DiagnosticProvider {
             var runBraces = getBetweenBraces(run.value());
             if (runBraces == null) return;
             //TODO check against unsafe inputs
-            diagnostics.add(DiagnosticBuilderService.getDiagnostic(run, DiagnosticBuilderService.DiagnosticType.CommandExecution));
+            diagnostics.add(DiagnosticBuilderService.getDiagnostic(run, DiagnosticBuilderService.DiagnosticType.COMMAND_EXECUTION));
         }));
 
     }

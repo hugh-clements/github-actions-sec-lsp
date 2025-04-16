@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Workspace sync class
  */
-public class WorkspaceService implements org.eclipse.lsp4j.services.WorkspaceService {
+public class ActionsWorkspaceService implements org.eclipse.lsp4j.services.WorkspaceService {
 
     @Override
     public CompletableFuture<Either<List<? extends SymbolInformation>, List<? extends WorkspaceSymbol>>> symbol(WorkspaceSymbolParams params) {
@@ -21,7 +21,6 @@ public class WorkspaceService implements org.eclipse.lsp4j.services.WorkspaceSer
 
     @Override
     public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params) {
-        //TODO use this to give warnings
         org.eclipse.lsp4j.services.WorkspaceService.super.didChangeWorkspaceFolders(params);
     }
 

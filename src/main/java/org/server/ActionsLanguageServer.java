@@ -1,4 +1,6 @@
 package org.server;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.*;
@@ -12,27 +14,28 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Language Server implementation class that is started by Start
  */
-public class LanguageServer  implements org.eclipse.lsp4j.services.LanguageServer, LanguageClientAware {
+public class ActionsLanguageServer  implements org.eclipse.lsp4j.services.LanguageServer, LanguageClientAware {
 
     Logger logger = LogManager.getLogger(getClass());
-    private final DocumentService documentService;
+    private final ActionsDocumentService actionsDocumentService;
     private final WorkspaceService workspaceService;
-    public LanguageClient client;
+    @Setter @Getter
+    private static LanguageClient client;
 
-    public LanguageServer() {
-        documentService = new DocumentService(this);
-        workspaceService = new org.server.WorkspaceService();
+    public ActionsLanguageServer() {
+        actionsDocumentService = new ActionsDocumentService();
+        workspaceService = new ActionsWorkspaceService();
     }
 
     @Override
     public CompletableFuture<InitializeResult> initialize(InitializeParams initializeParams) {
         logger.info("Initializing LanguageServer");
         final InitializeResult capabilities = new InitializeResult(new ServerCapabilities());
-        //TODO: ensure all required capabilities are present
-        capabilities.getCapabilities().setTextDocumentSync(TextDocumentSyncKind.Full);
-        //TODO may need to include a force document sync on open
-        capabilities.getCapabilities().setDiagnosticProvider(new DiagnosticRegistrationOptions());
-        capabilities.getCapabilities().setHoverProvider(true);
+        TextDocumentSyncOptions syncOptions = new TextDocumentSyncOptions();
+        syncOptions.setChange(TextDocumentSyncKind.Full); //Syncing the whole file rather than the changes
+        syncOptions.setOpenClose(true);
+        capabilities.getCapabilities().setTextDocumentSync(syncOptions);
+        capabilities.getCapabilities().setHoverProvider(false); //Line required for VSCode compatability
         return CompletableFuture.supplyAsync(() -> capabilities);
     }
 
@@ -49,7 +52,7 @@ public class LanguageServer  implements org.eclipse.lsp4j.services.LanguageServe
 
     @Override
     public TextDocumentService getTextDocumentService() {
-        return this.documentService;
+        return this.actionsDocumentService;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class LanguageServer  implements org.eclipse.lsp4j.services.LanguageServe
 
     @Override
     public void connect(LanguageClient languageClient) {
-
+        setClient(languageClient);
     }
 
 }

@@ -24,7 +24,7 @@ public class RepojackableTest {
         var model = getModel("src/test/resources/Diagnostic/repojackable2.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
         System.err.println(diagnostics);
-        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.Repojackable.toString()));
+        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.REPOJACKABLE.toString()));
     }
 
     @Test
@@ -32,6 +32,6 @@ public class RepojackableTest {
         var model = getModel("src/test/resources/Diagnostic/repojackable3.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
         System.err.println(diagnostics);
-        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.Repojackable.toString()));
+        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.REPOJACKABLE.toString()));
     }
 }

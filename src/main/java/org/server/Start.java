@@ -20,12 +20,11 @@ public class Start {
 
 
     public static void main(String[] args) throws Exception {
-        System.err.println("testtsettse");
         logger.info("Starting app...");
         try {
             startServer(System.in, System.out);
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("Failed to start server",e);
         }
     }
 
@@ -38,10 +37,9 @@ public class Start {
      */
     public static void startServer(InputStream in, OutputStream out) throws ExecutionException, InterruptedException {
         logger.info("Starting server...");
-        LanguageServer server = new LanguageServer();
+        ActionsLanguageServer server = new ActionsLanguageServer();
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(server, in, out);
         LanguageClient client = launcher.getRemoteProxy();
-        server.client = client;
         server.connect(client);
         Future<Void> future = launcher.startListening();
         future.get();

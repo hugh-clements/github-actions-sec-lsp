@@ -19,7 +19,7 @@ public class CodeInjectionDiagnosticProvider implements DiagnosticProvider {
     public List<Diagnostic> diagnose(DocumentModel document) {
         logger.info("Diagnosing Code Injection");
         var diagnostics = new ArrayList<Diagnostic>();
-        atJobsSteps(this::checkUsesWith,document, diagnostics, DiagnosticBuilderService.DiagnosticType.CodeInjection);
+        atJobsSteps(this::checkUsesWith,document, diagnostics, DiagnosticBuilderService.DiagnosticType.CODE_INJECTION);
         return diagnostics;
     }
 

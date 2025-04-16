@@ -9,6 +9,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.server.document.DocumentModel;
 import org.server.document.Located;
 
+import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
@@ -20,6 +21,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
@@ -31,36 +33,44 @@ import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
  */
 public class DiagnosticUtils {
 
+    private DiagnosticUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     static Logger logger = LogManager.getLogger(DiagnosticUtils.class);
 
     /**
      * Constant regex that matches the SHA commit hash
      */
-    public static final String commitHashRegex = "\\b[0-9a-f]{5,40}\\b";
+    protected static final String COMMIT_HASH_REGEX = "\\b[0-9a-f]{5,40}\\b";
 
-    public static final String[] untrustedInputs = {
-            "/github\\.event\\.issue\\.title/",
-            "/github\\.event\\.issue\\.body/",
-            "/github\\.event\\.pull_request\\.title/",
-            "/github\\.event\\.pull_request\\.body/",
-            "/github\\.event\\.comment\\.body/",
-            "/github\\.event\\.review\\.body/",
-            "/github\\.event\\.pages\\.[\\w.-]*\\.page_name/",
-            "/github\\.event\\.commits\\.[\\w.-]*\\.message/",
-            "/github\\.event\\.head_commit\\.message/",
-            "/github\\.event\\.head_commit\\.author\\.email/",
-            "/github\\.event\\.head_commit\\.author\\.name/",
-            "/github\\.event\\.commits\\.[\\w.-]*\\.author\\.email/",
-            "/github\\.event\\.commits\\.[\\w.-]*\\.author\\.name/",
-            "/github\\.event\\.pull_request\\.head\\.ref/",
-            "/github\\.event\\.pull_request\\.head\\.label/",
-            "/github\\.event\\.pull_request\\.head\\.repo\\.default_branch/",
-            "/github\\.event\\.workflow_run\\.head_branch/",
-            "/github\\.event\\.workflow_run\\.head_commit\\.message/",
-            "/github\\.event\\.workflow_run\\.head_commit\\.author\\.email/",
-            "/github\\.event\\.workflow_run\\.head_commit\\.author\\.name/",
-            "/github\\.head_ref/",
-            "/inputs\\.[\\w.-]*/",
+    private static final String NETWORK_ERROR = "Network error: Unknown host";
+    private static final String TIMEOUT_ERROR = "Timeout error: Timed out";
+    private static final String UNKNOWN_ERROR = "Unknown error";
+
+    protected static final String[] untrustedInputs = {
+            "github\\.event\\.issue\\.title",
+            "github\\.event\\.issue\\.body",
+            "github\\.event\\.pull_request\\.title",
+            "github\\.event\\.pull_request\\.body",
+            "github\\.event\\.comment\\.body",
+            "github\\.event\\.review\\.body",
+            "github\\.event\\.pages\\.[\\w.-]*\\.page_name",
+            "github\\.event\\.commits\\.[\\w.-]*\\.message",
+            "github\\.event\\.head_commit\\.message",
+            "github\\.event\\.head_commit\\.author\\.email",
+            "github\\.event\\.head_commit\\.author\\.name",
+            "github\\.event\\.commits\\.[\\w.-]*\\.author\\.email",
+            "github\\.event\\.commits\\.[\\w.-]*\\.author\\.name",
+            "github\\.event\\.pull_request\\.head\\.ref",
+            "github\\.event\\.pull_request\\.head\\.label",
+            "github\\.event\\.pull_request\\.head\\.repo\\.default_branch",
+            "github\\.event\\.workflow_run\\.head_branch",
+            "github\\.event\\.workflow_run\\.head_commit\\.message",
+            "github\\.event\\.workflow_run\\.head_commit\\.author\\.email",
+            "github\\.event\\.workflow_run\\.head_commit\\.author\\.name",
+            "github\\.head_ref",
+            "inputs\\.[\\w.-]*" //TODO maybe remove as not treated the same
     };
 
 
@@ -85,19 +95,17 @@ public class DiagnosticUtils {
             }
             var jsonElement = JsonParser.parseString(response.body());
             return jsonElement.getAsJsonObject();
-        } catch (UnknownHostException e) {
-            logger.error("Network error: Unknown host", e);
-            return null;
-        } catch (ConnectException e) {
-            logger.error("Network error: Connection failed", e);
+        } catch (UnknownHostException | ConnectException e) {
+            logger.error(NETWORK_ERROR, e);
             return null;
         } catch (SocketTimeoutException e) {
-            logger.error("Network error: Timeout", e);
+            logger.error(TIMEOUT_ERROR, e);
             return null;
         } catch (Exception e) {
-            e.printStackTrace(System.err);
-            logger.error("Unexpected error", e);
+            logger.error(UNKNOWN_ERROR, e);
             return null;
+        } finally {
+            client.close();
         }
     }
 
@@ -122,19 +130,17 @@ public class DiagnosticUtils {
             }
             var jsonElement = JsonParser.parseString(response.body());
             return jsonElement.getAsJsonArray();
-        } catch (UnknownHostException e) {
-            logger.error("Network error: Unknown host", e);
-            return null;
-        } catch (ConnectException e) {
-            logger.error("Network error: Connection failed", e);
+        } catch (UnknownHostException | ConnectException e) {
+            logger.error(NETWORK_ERROR, e);
             return null;
         } catch (SocketTimeoutException e) {
-            logger.error("Network error: Timeout", e);
+            logger.error(TIMEOUT_ERROR, e);
             return null;
         } catch (Exception e) {
-            e.printStackTrace(System.err);
-            logger.error("Unexpected error", e);
+            logger.error(UNKNOWN_ERROR, e);
             return null;
+        } finally {
+            client.close();
         }
     }
 
@@ -153,17 +159,13 @@ public class DiagnosticUtils {
         try {
             var response = client.send(request, HttpResponse.BodyHandlers.ofString());
             return response.statusCode();
-        } catch (UnknownHostException e) {
-            logger.error("Network error: Unknown host", e);
-            return 0;
-        } catch (ConnectException e) {
-            logger.error("Network error: Connection failed", e);
-            return 0;
-        } catch (SocketTimeoutException e) {
+        } catch (UnknownHostException | ConnectException e) {
+                logger.error(NETWORK_ERROR, e);
+                return 0;
+        }catch (SocketTimeoutException e) {
             logger.error("Network error: Timeout", e);
             return 0;
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
+        } catch (InterruptedException | IOException e ) {
             logger.error("Unexpected error", e);
             return 0;
         }
@@ -230,6 +232,15 @@ public class DiagnosticUtils {
                 diagnostics.add(getDiagnostic(stepWithString, diagnosticType));
             });
         });
+    }
+
+    /**
+     * Helper method to check if a string value is unsafe/untrusted
+     * @param input string to check
+     * @return true if the input string does match the untrusted inputs
+     */
+    public static Boolean isUnsafeInput(String input) {
+        return Arrays.stream(untrustedInputs).anyMatch(untrustedInput -> Pattern.matches(untrustedInput, input));
     }
 }
 

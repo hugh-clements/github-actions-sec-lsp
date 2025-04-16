@@ -14,9 +14,9 @@ import static org.server.diagnostic.DiagnosticUtils.atJobsSteps;
 
 public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
 
-    static Logger logger = LogManager.getLogger(DiagnosticService.class);
+    static Logger logger = LogManager.getLogger(PWNRequestDiagnosticProvider.class);
 
-    private static final String refPullRequestMergeRegex = "/refs/pull/[a-zA-Z0-9._-]+/merge$";
+    private static final String REF_PULL_REQUEST_MERGE_REGEX = "/refs/pull/[a-zA-Z0-9._-]+/merge$";
 
     @Override
     public List<Diagnostic> diagnose(DocumentModel document) {
@@ -24,7 +24,7 @@ public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
         var diagnostics = new ArrayList<Diagnostic>();
         if (document.model().on().events()
                 .stream().anyMatch(n -> n.eventName().equals("pull_request_target"))) {
-            atJobsSteps(this::checkUsesWith,document, diagnostics, DiagnosticBuilderService.DiagnosticType.PWNRequest);
+            atJobsSteps(this::checkUsesWith,document, diagnostics, DiagnosticBuilderService.DiagnosticType.PWN_REQUEST);
         }
         return diagnostics;
     }
@@ -39,7 +39,7 @@ public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
             var refValue = ref.getFirst().getValue();
             if (refValue.value() == null) return null;
             //Check if is a pull request merge reference
-            if (refValue.value().matches(refPullRequestMergeRegex) &&
+            if (refValue.value().matches(REF_PULL_REQUEST_MERGE_REGEX) &&
             refValue.value().contains("github.event.pull_request.head")) {
                 return refValue;
             }
