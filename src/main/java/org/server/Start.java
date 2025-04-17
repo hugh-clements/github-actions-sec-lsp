@@ -20,7 +20,7 @@ public class Start {
 
 
     public static void main(String[] args) throws Exception {
-        logger.info("Starting app...");
+        logger.warn("Starting app...");
         try {
             startServer(System.in, System.out);
         } catch (Exception e) {

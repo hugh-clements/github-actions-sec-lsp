@@ -27,11 +27,12 @@ public class UnsafeInputAssignmentDiagnosticProvider implements DiagnosticProvid
     }
 
     private void checkInputAssignment(List<Diagnostic> diagnostics, DocumentModel.With with) {
-       getWithStrings(with).forEach( withString -> {
-           var betweenBraces = getBetweenBraces(withString.value());
+        if (with == null || with.mappings().isEmpty()) return;
+        getWithStrings(with).forEach( (withKey, withValue) -> {
+           var betweenBraces = getBetweenBraces(withValue.value());
            if (betweenBraces == null) return;
            if (isUnsafeInput(betweenBraces))
-               diagnostics.add(getDiagnostic(withString, DiagnosticBuilderService.DiagnosticType.UNSAFE_INPUT_ASSIGNMENT));
+               diagnostics.add(getDiagnostic(withValue, DiagnosticBuilderService.DiagnosticType.UNSAFE_INPUT_ASSIGNMENT));
        });
     }
 

@@ -30,10 +30,11 @@ public class OutdatedReferenceDiagnosticProvider implements DiagnosticProvider {
     private void checkOutdatedReference(List<Diagnostic> diagnostics, Located<String> uses) {
         if (uses == null) return;
         var usesAction = uses.value().split("[/@]");
+        if (usesAction.length < 2) return;
         var currentCommit = getCommitFromHash(usesAction[0],usesAction[1],usesAction[usesAction.length-1]);
         if (currentCommit ==  null) return;
         if (currentCommit.entrySet().isEmpty() || !currentCommit.getAsJsonObject(COMMIT).getAsJsonObject("verification").getAsJsonPrimitive("verified").getAsBoolean()) {
-            diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.REPOJACKABLE));
+            diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.OUTDATED_REFERENCE));
             return;
         }
         var allCommits = DiagnosticUtils.getRepoCommits(usesAction[0],usesAction[1]);
@@ -47,7 +48,7 @@ public class OutdatedReferenceDiagnosticProvider implements DiagnosticProvider {
                 .getAsJsonObject(AUTHOR)
                 .get(DATE).getAsString();
         if (olderThan3Months(currentCommitDate, latestCommitDate)) {
-            diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.REPOJACKABLE));
+            diagnostics.add(getDiagnostic(uses, DiagnosticBuilderService.DiagnosticType.OUTDATED_REFERENCE));
         }
     }
 }

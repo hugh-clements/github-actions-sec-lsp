@@ -146,8 +146,6 @@ public record DocumentModel(String lang, String documentURI, org.server.document
     @Builder
     public record With(
             @Singular List<Located<String>> values,
-            Located<String> entrypoint,
-            Located<String> args,
             @Singular Map<String, Located<String>> mappings
     ) {}
 }

@@ -1,4 +1,4 @@
-name: test unpinned action
+name: test
 
 on: push
 
@@ -7,4 +7,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2
+        uses: actions/checkout@e8bd1dffb6451bb0d84dbcd3ed059daca1371180 #Outdated reference

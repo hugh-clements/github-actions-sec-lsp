@@ -1,3 +1,5 @@
+package model;
+
 import org.junit.jupiter.api.Test;
 import org.server.document.ModelConstructorService;
 
@@ -142,8 +144,6 @@ public class NodeParserTest {
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
         Utils.prettyPrint(parsed.value());
     }
-
-
 
 
 

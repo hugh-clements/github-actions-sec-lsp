@@ -6,10 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: test redirect
+        uses: nick-invision/retry@d6b241c90e867e2d605cfe1b48976c9c6e5337dc
 
-      - name: Run repojackable action
-        # Vulnerable reference: "old-org" might be renamed or disappear,
-        # allowing an attacker to take control of "repojackable-action"
-        uses: old-org/repojackable-action@v1
+

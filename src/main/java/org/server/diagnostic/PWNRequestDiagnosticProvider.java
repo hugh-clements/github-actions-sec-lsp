@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.server.diagnostic.DiagnosticUtils.atJobsSteps;
+import static org.server.diagnostic.DiagnosticUtils.isNull;
 
 
 public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
@@ -31,7 +32,8 @@ public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
 
 
     private Located<String> checkUsesWith(Located<String> uses, DocumentModel.With with) {
-        if (uses.value().contains("actions/checkout")) {
+       if (isNull(uses,with)) return null;
+       if (uses.value().contains("actions/checkout")) {
             var ref = with.mappings().entrySet().stream().filter(stringLocatedEntry -> stringLocatedEntry.getKey().equals("ref")).toList();
             if (ref.isEmpty()) {
                 return null;
@@ -39,7 +41,7 @@ public class PWNRequestDiagnosticProvider implements DiagnosticProvider {
             var refValue = ref.getFirst().getValue();
             if (refValue.value() == null) return null;
             //Check if is a pull request merge reference
-            if (refValue.value().matches(REF_PULL_REQUEST_MERGE_REGEX) &&
+            if (refValue.value().matches(REF_PULL_REQUEST_MERGE_REGEX) ||
             refValue.value().contains("github.event.pull_request.head")) {
                 return refValue;
             }

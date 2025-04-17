@@ -29,7 +29,7 @@ public class ModelConstructorService {
      */
     public Located<DocumentModel> modelConstructor(String lang, String documentURI, String text) {
         logger.info("Constructing model");
-        //Checking if the lang is yaml
+        //Checking if the lang is YAML
         if (!Objects.equals(lang, "yaml")) return new Located<>(1, 1, 1, 1, new DocumentModel(lang, null, null));
         var node = parseYAML(text);
         if (!(node instanceof MappingNode)) {
@@ -144,7 +144,7 @@ public class ModelConstructorService {
                     builder.workflowCall(callBuilder.build()).build();
                     break;
                 }
-                mappingToMap(node).forEach( (s, n) -> {
+                mappingToMap(node).forEach((s, n) -> {
                     switch (s) {
                         case "inputs" -> callBuilder.input(n);
                         case "outputs" -> callBuilder.output(n);
@@ -160,13 +160,13 @@ public class ModelConstructorService {
                     builder.workflowRun(runBuilder.build()).build();
                     break;
                 }
-                mappingToMap(getSingletonMapValue((MappingNode) node)).forEach( (s, n) -> {
+                mappingToMap(node).forEach( (s, n) -> {
                     switch (s) {
                         case "workflows" -> runBuilder.workflows(getStringFromSequenceOrScalar(n));
                         case "types" -> runBuilder.types(getStringFromSequenceOrScalar(n));
                         case "branches" -> runBuilder.branches(n);
                         case "branches-ignore" -> runBuilder.branchesIgnore(n);
-                        default -> throw new IllegalArgumentException("Failed to parse 'WorkflowEvent' node, unexpected node type");
+                        default -> throw new IllegalArgumentException("Failed to parse 'WorkflowEvent' node: " + s);
                     }
                 });
                 builder.workflowRun(runBuilder.build());
@@ -199,7 +199,7 @@ public class ModelConstructorService {
         return Collections.singletonList(builder.build());
     }
 
-    /** Parsing Sequence of Events with no arguments **/
+    /** Parsing a Sequence of Events with no arguments **/
     public List<DocumentModel.Event> parseSimpleEventSequence(SequenceNode eventSequenceNode) {
         logger.info("Parsing simple Event sequence");
         List<DocumentModel.Event> event = new ArrayList<>();
@@ -380,6 +380,7 @@ public class ModelConstructorService {
                 switch (node) {
                     case MappingNode m -> builder.mapping(getSingletonMapKey(m), locate(m,getSingletonMapValueString(m)));
                     case ScalarNode s -> builder.value(locate(s,parseToString(s)));
+                    //TODO add sequence node
                     default -> throw new IllegalArgumentException("Unexpected node type in With SequenceNode: " + node);
                 }
             });

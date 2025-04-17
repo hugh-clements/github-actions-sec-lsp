@@ -1,0 +1,21 @@
+name: Unsafe Input Assignment Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      dangerous_input:
+        description: 'Potentially attacker-controlled input'
+        required: true
+        default: ''
+
+jobs:
+  unsafe-input:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run potentially unsafe command
+        uses: some-action/example-action@v1
+        with:
+          argument: ${{ github.event.inputs.dangerous_input }}

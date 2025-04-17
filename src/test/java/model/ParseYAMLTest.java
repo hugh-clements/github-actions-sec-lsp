@@ -1,3 +1,5 @@
+package model;
+
 import org.junit.jupiter.api.Test;
 import org.server.document.ModelConstructorService;
 import org.yaml.snakeyaml.nodes.MappingNode;

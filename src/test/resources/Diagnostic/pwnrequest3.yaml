@@ -1,0 +1,21 @@
+name: Vulnerable PR Target Workflow
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+
+jobs:
+  dangerous-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      # This is the core of the PWN_REQUEST issue:
+      # it checks out the attacker's pull request code with privileged context
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+
+      # Now any malicious code from the PR could execute here!
+      - name: Run build commands
+        run: |
+          npm install
+          npm run build

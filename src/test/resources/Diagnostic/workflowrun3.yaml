@@ -1,0 +1,14 @@
+name: Unsafe Workflow Run Checkout
+
+on: push
+
+jobs:
+  risky-job:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Run a script
+        run: |
+          echo "Running code from branch: ${{ github.event.workflow_run.head_branch }}"
+          cat README.md

@@ -8,9 +8,10 @@ import org.server.document.Located;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
-import static org.server.diagnostic.DiagnosticUtils.atJobsSteps;
-import static org.server.diagnostic.DiagnosticUtils.getWithStrings;
+import static org.server.diagnostic.DiagnosticUtils.*;
 
 public class WorkflowRunDiagnosticProvider implements DiagnosticProvider {
 
@@ -20,7 +21,9 @@ public class WorkflowRunDiagnosticProvider implements DiagnosticProvider {
     public List<Diagnostic> diagnose(DocumentModel document) {
         logger.info("Diagnosing Workflow Run");
         var diagnostics = new ArrayList<Diagnostic>();
-        if (document.model().on().workflowEvents()
+        var workflowEvents = document.model().on().workflowEvents();
+        if (workflowEvents == null) return diagnostics;
+        if (workflowEvents
                 .stream().anyMatch(n -> n.workflowRun() != null)) {
             atJobsSteps(this::checkUsesWith,document, diagnostics, DiagnosticBuilderService.DiagnosticType.WORKFLOW_RUN);
         }
@@ -28,15 +31,18 @@ public class WorkflowRunDiagnosticProvider implements DiagnosticProvider {
     }
 
     private Located<String> checkUsesWith(Located<String> uses, DocumentModel.With with) {
+        if (isNull(uses, with)) return null;
         if (uses.value().contains("actions/checkout")) {
-            return getWithStrings(with).stream()
-                    .filter(withString -> {
-                        var ref = withString.value().split("@");
-                        return ref.length > 1 && ref[1].contains("github.event.workflow_run");
-                    })
+            return getWithStrings(with).entrySet().stream()
+                    .filter(entry -> "ref".equals(entry.getKey()))
+                    .map(Map.Entry::getValue)
+                    .filter(Objects::nonNull)
+                    .filter(val -> val.value() != null && val.value().contains("github.event.workflow_run"))
                     .findFirst()
                     .orElse(null);
         }
         return null;
     }
+
+
 }

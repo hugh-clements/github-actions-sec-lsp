@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.server.diagnostic.DiagnosticUtils.atJobsSteps;
+import static org.server.diagnostic.DiagnosticUtils.isNull;
 
 public class CodeInjectionDiagnosticProvider implements DiagnosticProvider {
 
@@ -25,6 +26,7 @@ public class CodeInjectionDiagnosticProvider implements DiagnosticProvider {
 
 
     private Located<String> checkUsesWith(Located<String> uses, DocumentModel.With with) {
+        if (isNull(uses,with)) return null;
         //TODO deal with inputs here
         return null;
     }

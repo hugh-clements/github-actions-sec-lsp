@@ -28,14 +28,8 @@ public class ActionsDocumentService implements TextDocumentService {
     }
 
     @Override
-    public CompletableFuture<DocumentDiagnosticReport> diagnostic(DocumentDiagnosticParams params) {
-        logger.info("diagnostic");
-        return TextDocumentService.super.diagnostic(params);
-    }
-
-    @Override
     public void didOpen(DidOpenTextDocumentParams didOpenTextDocumentParams) {
-        logger.info("didOpen");
+        logger.warn("didOpen");
         TextDocumentItem textDocumentItem = didOpenTextDocumentParams.getTextDocument();
         try {
             this.documentModel = modelConstructorService.modelConstructor(
@@ -54,7 +48,7 @@ public class ActionsDocumentService implements TextDocumentService {
 
     @Override
     public void didChange(DidChangeTextDocumentParams didChangeTextDocumentParams) {
-        logger.info("didChange");
+        logger.warn("didChange");
         String documentChangeString = didChangeTextDocumentParams.getContentChanges().getFirst().getText();
         try {
             this.documentModel = modelConstructorService.modelConstructor(
@@ -73,11 +67,11 @@ public class ActionsDocumentService implements TextDocumentService {
 
     @Override
     public void didClose(DidCloseTextDocumentParams didCloseTextDocumentParams) {
-        logger.info("didClose");
+        logger.warn("didClose");
     }
 
     @Override
     public void didSave(DidSaveTextDocumentParams didSaveTextDocumentParams) {
-        logger.info("didSave");
+        logger.warn("didSave");
     }
 }

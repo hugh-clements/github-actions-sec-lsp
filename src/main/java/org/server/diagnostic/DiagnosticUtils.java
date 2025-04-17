@@ -21,9 +21,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.regex.Pattern;
 
@@ -179,7 +177,7 @@ public class DiagnosticUtils {
      * @param latest  date
      * @return true if the difference is 3 months or more
      */
-    public static Boolean olderThan3Months(String current, String latest) {
+    public static boolean olderThan3Months(String current, String latest) {
         LocalDateTime currentDate = OffsetDateTime.parse(current).toLocalDateTime();
         LocalDateTime latestDate = OffsetDateTime.parse(latest).toLocalDateTime();
         Duration between = Duration.between(currentDate, latestDate);
@@ -191,13 +189,13 @@ public class DiagnosticUtils {
      * @param with With block from the DocumentModel
      * @return Strings
      */
-    public static List<Located<String>> getWithStrings(DocumentModel.With with) {
-        var stringList = new ArrayList<Located<String>>();
-        stringList.addAll(with.values());
-        stringList.addAll(with.mappings().values());
-        stringList.add(with.args());
-        stringList.add(with.entrypoint());
-        return stringList;
+    public static Map<String,Located<String>> getWithStrings(DocumentModel.With with) {
+        var stringMap = new HashMap<String,Located<String>>();
+        if (with.values() != null) {
+            with.values().forEach(value -> stringMap.put(null,value));
+        }
+        stringMap.putAll(with.mappings());
+        return stringMap;
     }
 
     /**
@@ -242,6 +240,10 @@ public class DiagnosticUtils {
      */
     public static boolean isUnsafeInput(String input) {
         return Arrays.stream(untrustedInputs).anyMatch(untrustedInput -> Pattern.matches(untrustedInput, input));
+    }
+
+    public static boolean isNull(Located<String> uses ,DocumentModel.With with) {
+         return uses == null || with == null || with.mappings().isEmpty();
     }
 }
 

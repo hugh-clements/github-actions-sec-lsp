@@ -15,6 +15,7 @@
 
         <!-- Console appender for ERROR logs only, directed to STDERR -->
         <Console name="ErrorConsole" target="SYSTEM_ERR">
+            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout>
                 <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</Pattern>
             </PatternLayout>%

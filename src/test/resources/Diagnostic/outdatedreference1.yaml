@@ -1,0 +1,11 @@
+name: no issues
+
+on: push
+
+jobs:
+  example-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: test
+        uses: echo "this is a test"
+
