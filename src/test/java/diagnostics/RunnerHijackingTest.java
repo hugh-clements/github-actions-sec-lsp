@@ -8,19 +8,19 @@ import java.io.IOException;
 
 import static diagnostics.TestUtils.getModel;
 
-public class RunnerHijackingTest {
+class RunnerHijackingTest {
 
     private static final RunnerHijackingDiagnosticProvider diagnosticService = new RunnerHijackingDiagnosticProvider();
 
     @Test
-    public void testNoIssue() throws IOException {
+    void testNoIssue() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/runnerhijacking1.yaml");
         var diagnostics = diagnosticService.diagnose(model.value());
         assert diagnostics.isEmpty();
     }
 
     @Test
-    public void testSingleRunner() throws IOException {
+    void testSingleRunner() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/runnerhijacking2.yaml");
         var diagnostics = diagnosticService.diagnose(model.value());
         assert diagnostics.size() == 1;
@@ -30,7 +30,7 @@ public class RunnerHijackingTest {
 
 
     @Test
-    public void testRunnerList() throws IOException {
+    void testRunnerList() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/runnerhijacking3.yaml");
         var diagnostics = diagnosticService.diagnose(model.value());
         assert diagnostics.size() == 1;
@@ -39,7 +39,7 @@ public class RunnerHijackingTest {
 
 
     @Test
-    public void testRunnerList2() throws IOException {
+    void testRunnerList2() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/runnerhijacking4.yaml");
         var diagnostics = diagnosticService.diagnose(model.value());
         assert diagnostics.size() == 2;

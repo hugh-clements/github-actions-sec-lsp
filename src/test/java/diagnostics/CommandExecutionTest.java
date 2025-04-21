@@ -23,8 +23,8 @@ class CommandExecutionTest {
     void testSingleInWithStep() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/commandexecution2.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
-        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.COMMAND_EXECUTION.toString()));
-        System.err.println(diagnostics);
+        assert diagnostics.stream().anyMatch(diagnostic ->
+                diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.COMMAND_EXECUTION.toString()));
         assert diagnostics.size() == 1;
     }
 
@@ -32,7 +32,6 @@ class CommandExecutionTest {
     void testSingleInputs() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/commandexecution3.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
-        System.err.println(diagnostics);
         assert diagnostics.stream().anyMatch(diagnostic ->
                 diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.COMMAND_EXECUTION.toString())
                         && diagnostic.getRelatedInformation() != null

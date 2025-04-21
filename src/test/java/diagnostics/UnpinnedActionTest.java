@@ -8,27 +8,26 @@ import java.io.IOException;
 
 import static diagnostics.TestUtils.getModel;
 
-public class UnpinnedActionTest {
+class UnpinnedActionTest {
 
     private static final ActionReferencingDiagnosticProvider diagnosticProvider = new ActionReferencingDiagnosticProvider();
 
     @Test
-    public void testNoIssues() throws IOException {
+    void testNoIssues() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/unpinnedaction1.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
         assert diagnostics.isEmpty();
     }
 
     @Test
-    public void testSingleIssue() throws IOException {
+    void testSingleIssue() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/unpinnedaction2.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
-        System.err.println(diagnostics);
         assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.UNPINNED_ACTION.toString()));
     }
 
     @Test
-    public void testMultipleIssues() throws IOException {
+    void testMultipleIssues() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/unpinnedaction3.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
         assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.UNPINNED_ACTION.toString()));

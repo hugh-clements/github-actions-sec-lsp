@@ -29,7 +29,6 @@ class PWNRequestTest {
     @Test void testSingleIssue() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/pwnrequest2.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
-        System.err.println(diagnostics);
         assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.PWN_REQUEST.toString()));
     }
 }

@@ -31,8 +31,8 @@ public class ActionReferencingDiagnosticProvider implements DiagnosticProvider {
         if (uses == null) return;
         var value = uses.value();
         switch (value) {
-            case String a when a.contains("docker://") -> {}
-            case String b when b.contains("./") -> {}
+            case String a when a.contains("docker://") -> {/*This is an empty return */}
+            case String b when b.contains("./") -> {/*This is an empty return */}
             default -> {
                 var split = value.split("[/@]");
                 if (split.length < 2) return;

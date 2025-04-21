@@ -8,10 +8,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ParseYAMLTest {
+class ParseYAMLTest {
 
     @Test
-    public void testParseYAML() throws IOException {
+    void testParseYAML() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testConcurrency1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsedYAML = modelConstructorService.parseYAML(toParse);
@@ -21,7 +21,7 @@ public class ParseYAMLTest {
     }
 
     @Test
-    public void testParseNotYAML() throws IOException {
+    void testParseNotYAML() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testNotYaml.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsedYAML = modelConstructorService.parseYAML(toParse);
@@ -29,7 +29,7 @@ public class ParseYAMLTest {
     }
 
     @Test
-    public void testParseNotYAML2() throws IOException {
+    void testParseNotYAML2() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testNotYaml2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsedYAML = modelConstructorService.parseYAML(toParse);

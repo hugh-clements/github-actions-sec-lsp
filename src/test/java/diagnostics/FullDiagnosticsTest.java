@@ -16,7 +16,6 @@ class FullDiagnosticsTest {
     void testAllDiagnostics() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/fulldiagnostics1.yaml");
         var diagnostics = diagnosticService.diagnose(model);
-        System.err.println(diagnostics);
         assert diagnostics.size() == 5;
         assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.COMMAND_EXECUTION.toString()));
         assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.UNPINNED_ACTION.toString()));

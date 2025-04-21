@@ -17,7 +17,7 @@ public class ActionsWorkspaceService implements org.eclipse.lsp4j.services.Works
     }
 
     @Override
-    public void didChangeConfiguration(DidChangeConfigurationParams didChangeConfigurationParams) {}
+    public void didChangeConfiguration(DidChangeConfigurationParams didChangeConfigurationParams) {/*This is a required method by the interface that is not used*/}
 
     @Override
     public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params) {
@@ -26,6 +26,6 @@ public class ActionsWorkspaceService implements org.eclipse.lsp4j.services.Works
 
 
     @Override
-    public void didChangeWatchedFiles(DidChangeWatchedFilesParams didChangeWatchedFilesParams) {}
+    public void didChangeWatchedFiles(DidChangeWatchedFilesParams didChangeWatchedFilesParams) {/*This is a required method by the interface that is not used*/}
 
 }

@@ -310,7 +310,7 @@ public class ModelConstructorService {
             case "{}" -> SecretsAndPermissions.PermissionLevel.NONE;
             default -> throw new IllegalArgumentException("Failed to parse permissions inside ScalarNode");
         };
-        var map = new HashMap<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel>();
+        Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> map = new EnumMap<>(SecretsAndPermissions.PermissionType.class);
         for (var value : SecretsAndPermissions.PermissionType.values()) {
             map.put(value, level);
         }
@@ -320,7 +320,7 @@ public class ModelConstructorService {
     /** Parsing MappingNode of permissions **/
     private Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> parseMappingPermissions(MappingNode mappingNode) {
         logger.info("Parsing mapping permissions");
-        var map = new HashMap<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel>();
+        Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> map = new EnumMap<>(SecretsAndPermissions.PermissionType.class);
         mappingToMap(mappingNode).forEach((string,node) -> {
             var level = switch (((ScalarNode)node).getValue()) {
                 case "read" -> SecretsAndPermissions.PermissionLevel.READ;
