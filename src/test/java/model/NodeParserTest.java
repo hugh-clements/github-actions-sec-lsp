@@ -7,10 +7,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class NodeParserTest {
+class NodeParserTest {
 
     @Test
-    public void testNodeParser() throws IOException {
+    void testNodeParser() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/test1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -18,7 +18,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParser2() throws IOException {
+    void testNodeParser2() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/test2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -26,7 +26,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserConcurrency1() throws IOException {
+    void testNodeParserConcurrency1() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testConcurrency1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -34,7 +34,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserDefaults1() throws IOException {
+    void testNodeParserDefaults1() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testDefaults1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -42,7 +42,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserEvents1() throws IOException {
+    void testNodeParserEvents1() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testEvents1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -50,7 +50,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserEvents2() throws IOException {
+    void testNodeParserEvents2() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testEvents2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -58,7 +58,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserPermissions1() throws IOException {
+    void testNodeParserPermissions1() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testPermissions1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -66,7 +66,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserPermissions2() throws IOException {
+    void testNodeParserPermissions2() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testPermissions2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -74,7 +74,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserPermissions3() throws IOException {
+    void testNodeParserPermissions3() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testPermissions3.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -82,7 +82,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserSecrets1() throws IOException {
+    void testNodeParserSecrets1() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSecrets1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -90,7 +90,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserSecrets2() throws IOException {
+    void testNodeParserSecrets2() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSecrets2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -98,7 +98,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserWorkflowEvents1() throws IOException {
+    void testNodeParserWorkflowEvents1() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testWorkflowEvents1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -106,7 +106,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserSteps1() throws IOException {
+    void testNodeParserSteps1() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps1.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -114,7 +114,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserSteps2() throws IOException {
+    void testNodeParserSteps2() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps2.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -122,7 +122,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserSteps3() throws IOException {
+    void testNodeParserSteps3() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps3.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -130,7 +130,7 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserSteps4() throws IOException {
+    void testNodeParserSteps4() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps4.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
@@ -138,13 +138,27 @@ public class NodeParserTest {
     }
 
     @Test
-    public void testNodeParserSteps5() throws IOException {
+    void testNodeParserSteps5() throws IOException {
         String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testSteps5.yaml"));
         var modelConstructorService = new ModelConstructorService();
         var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
         Utils.prettyPrint(parsed.value());
     }
 
+    @Test
+    void testNodeParserInputs1() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testInputs1.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed.value());
+    }
 
+    @Test
+    void testNodeParserInputs2() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testInputs2.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed.value());
+    }
 
 }

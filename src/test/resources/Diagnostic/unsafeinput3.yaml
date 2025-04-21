@@ -1,21 +1,21 @@
-name: Unsafe Input Assignment Example
+name: Safe Input Handling
 
 on:
-  workflow_dispatch:
-    inputs:
-      dangerous_input:
-        description: 'Potentially attacker-controlled input'
-        required: true
-        default: ''
+  pull_request_target:
 
 jobs:
-  unsafe-input:
+  test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run potentially unsafe command
+      - name: Log PR Title (untrusted, for informational purposes only)
+        run: |
+          echo "PR Title: ${{ github.event.pull_request.title }}" | sed 's/[^a-zA-Z0-9 ]//g'
+
+      - name: Pass safe static value to action
         uses: some-action/example-action@v1
         with:
-          argument: ${{ github.event.inputs.dangerous_input }}
+          message: "Pull request received from ${{ github.event.pull_request.user.login }}"

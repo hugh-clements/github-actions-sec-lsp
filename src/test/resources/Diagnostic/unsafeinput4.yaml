@@ -1,21 +1,37 @@
-name: Unsafe Input Assignment Example
+name: Unsafe Input Assign Example
 
 on:
-  workflow_dispatch:
-    inputs:
-      dangerous_input:
-        description: 'Potentially attacker-controlled input'
-        required: true
-        default: ''
+  pull_request_target:
+    types: [opened, synchronize]
 
 jobs:
-  unsafe-input:
+  vulnerable-job:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run potentially unsafe command
-        uses: some-action/example-action@v1
+      - name: Using untrusted PR title
+        uses: some-user/some-action@v1
         with:
-          argument: ${{ github.event.inputs.dangerous_input }}
+          input: ${{ github.event.pull_request.title }}
+
+      - name: Using untrusted PR body
+        uses: some-user/another-action@v1
+        with:
+          message: ${{ github.event.pull_request.body }}
+
+      - name: Using untrusted issue body
+        uses: some-user/safe-looking-action@v2
+        with:
+          config: ${{ github.event.issue.body }}
+
+      - name: Using untrusted commit message
+        uses: yet-another-action/runner@v1
+        with:
+          commit_message: ${{ github.event.head_commit.message }}
+
+      - name: Using untrusted branch name
+        uses: some-org/branch-action@v3
+        with:
+          branch: ${{ github.event.pull_request.head.ref }}

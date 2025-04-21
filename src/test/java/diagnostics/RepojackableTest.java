@@ -6,7 +6,7 @@ import org.server.diagnostic.DiagnosticBuilderService;
 
 import java.io.IOException;
 
-import static diagnostics.UtilsTest.getModel;
+import static diagnostics.TestUtils.getModel;
 
 class RepojackableTest {
 
@@ -32,4 +32,5 @@ class RepojackableTest {
         var diagnostics = diagnosticProvider.diagnose(model.value());
         assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.REPOJACKABLE.toString()));
     }
+
 }

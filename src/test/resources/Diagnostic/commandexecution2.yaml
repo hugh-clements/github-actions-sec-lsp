@@ -1,0 +1,21 @@
+name: Vulnerable Input Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      some_input:
+        description: "User-controlled input"
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pass input to action
+        uses: some/action@v1
+        with:
+          some_input: ${{ inputs.some_input }}
+
+      - name: Run unsafely with user input
+        run: |
+          echo "Executing: ${{ inputs.some_input }}"

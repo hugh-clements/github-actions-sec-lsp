@@ -1,0 +1,16 @@
+name: Dangerous Workflow Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: "Where to deploy"
+        required: true
+        default: "staging"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Unsafe deploy
+        run: echo "Deploying to ${{ inputs.deploy_target }}"

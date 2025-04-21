@@ -1,5 +1,7 @@
 package org.server.diagnostic;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
 import org.server.document.DocumentModel;
 import org.server.document.Located;
@@ -13,12 +15,15 @@ import static org.server.diagnostic.DiagnosticUtils.olderThan3Months;
 
 public class OutdatedReferenceDiagnosticProvider implements DiagnosticProvider {
 
+    static Logger logger = LogManager.getLogger(OutdatedReferenceDiagnosticProvider.class);
+
     private static final String COMMIT = "commit";
     private static final String AUTHOR = "author";
     private static final String DATE = "date";
 
     @Override
     public List<Diagnostic> diagnose(DocumentModel doc) {
+        logger.info("Diagnosing outdated reference");
         var diagnostics = new ArrayList<Diagnostic>();
         doc.model().jobs().forEach(job -> {
            checkOutdatedReference(diagnostics,job.uses());

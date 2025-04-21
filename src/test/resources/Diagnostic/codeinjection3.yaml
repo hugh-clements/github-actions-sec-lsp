@@ -1,0 +1,24 @@
+name: Prereport Demonstration
+
+on:
+  workflow_dispatch:
+    inputs:
+      attacker_controlled:
+        description: "User‑provided value"
+        required: true
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Capture the input
+        id: capture
+        uses: some-org/some-action@v1
+        with:
+          attacker_controlled: ${{ inputs.attacker_controlled }}
+
+      - name: Unsafe code inject
+        uses: actions/github-script@v7
+        with:
+          script: |
+            console.log("Here’s the untrusted input: ${{ inputs.attacker_controlled }}");

@@ -3,12 +3,12 @@ package org.server.diagnostic;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import lombok.NonNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
 import org.server.document.DocumentModel;
 import org.server.document.Located;
+import org.server.document.WorkflowEvents;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -23,9 +23,11 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
+
 
 /**
  * Helper class for diagnostic providers to avoid repeating code
@@ -46,6 +48,8 @@ public class DiagnosticUtils {
     private static final String NETWORK_ERROR = "Network error: Unknown host";
     private static final String TIMEOUT_ERROR = "Timeout error: Timed out";
     private static final String UNKNOWN_ERROR = "Unknown error";
+    private static final String GITHUB_URL = "https://api.github.com/repos/";
+
 
     protected static final String[] untrustedInputs = {
             "github\\.event\\.issue\\.title",
@@ -68,8 +72,7 @@ public class DiagnosticUtils {
             "github\\.event\\.workflow_run\\.head_commit\\.message",
             "github\\.event\\.workflow_run\\.head_commit\\.author\\.email",
             "github\\.event\\.workflow_run\\.head_commit\\.author\\.name",
-            "github\\.head_ref",
-            "inputs\\.[\\w.-]*" //TODO maybe remove as not treated the same
+            "github\\.head_ref"
     };
 
 
@@ -79,16 +82,12 @@ public class DiagnosticUtils {
      * @param owner      repository owner
      * @param repo       repository name
      * @param commitHash commit hash to get
-     * @return Json object result fromm GitHub API
+     * @return JSON object result from GitHub API
      */
     public static JsonObject getCommitFromHash(String owner, String repo, String commitHash) {
-        var client = HttpClient.newHttpClient();
-        var uri = URI.create("https://api.github.com/repos/" + owner + "/" + repo + "/commits/" + commitHash);
-        var request = HttpRequest.newBuilder()
-                .header("User-Agent", "Security-LSP")
-                .uri(uri).GET().build();
-        try {
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        try (var client = HttpClient.newHttpClient()) {
+            var uri = URI.create(GITHUB_URL + owner + "/" + repo + "/commits/" + commitHash);
+            var response = client.send(buildRequest(uri), HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
                 return new JsonObject();
             }
@@ -103,8 +102,6 @@ public class DiagnosticUtils {
         } catch (Exception e) {
             logger.error(UNKNOWN_ERROR, e);
             return null;
-        } finally {
-            client.close();
         }
     }
 
@@ -114,16 +111,12 @@ public class DiagnosticUtils {
      *
      * @param owner repository owner
      * @param repo  repository name
-     * @return Json Object result fromm GitHub API
+     * @return JSON Object result from GitHub API
      */
     public static JsonArray getRepoCommits(String owner, String repo) {
-        var client = HttpClient.newHttpClient();
-        var uri = URI.create("https://api.github.com/repos/" + owner + "/" + repo + "/commits?sha=main");
-        var request = HttpRequest.newBuilder()
-                .header("User-Agent", "Security-LSP")
-                .uri(uri).GET().build();
-        try {
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        try (var client = HttpClient.newHttpClient()) {
+            var uri = URI.create(GITHUB_URL + owner + "/" + repo + "/commits?sha=main");
+            var response = client.send(buildRequest(uri), HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
                 return new JsonArray();
             }
@@ -138,10 +131,9 @@ public class DiagnosticUtils {
         } catch (Exception e) {
             logger.error(UNKNOWN_ERROR, e);
             return null;
-        } finally {
-            client.close();
         }
     }
+
 
     /**
      * Helper method to get the status code from a repository request
@@ -150,13 +142,9 @@ public class DiagnosticUtils {
      * @return status code
      */
     public static int getRepoStatus(String owner, String repo) {
-        var client = HttpClient.newHttpClient();
-        var uri = URI.create("https://api.github.com/repos/" + owner + "/" + repo);
-        var request = HttpRequest.newBuilder()
-                .header("User-Agent", "Security-LSP")
-                .uri(uri).GET().build();
-        try {
-            var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        try (var client = HttpClient.newHttpClient()) {
+            var uri = URI.create(GITHUB_URL + owner + "/" + repo);
+            var response = client.send(buildRequest(uri), HttpResponse.BodyHandlers.ofString());
             return response.statusCode();
         } catch (UnknownHostException | ConnectException e) {
                 logger.error(NETWORK_ERROR, e);
@@ -168,6 +156,17 @@ public class DiagnosticUtils {
             logger.error("Unexpected error", e);
             return 0;
         }
+    }
+
+
+    /**
+     * Helper method to build requests
+     * @param uri uri to build a request for
+     * @return HTTP request for the uri
+     */
+    private static HttpRequest buildRequest(URI uri) {
+        return HttpRequest.newBuilder().header("User-Agent", "Security-LSP")
+                .uri(uri).GET().build();
     }
 
 
@@ -184,6 +183,7 @@ public class DiagnosticUtils {
         return between.compareTo(Duration.ofDays(90)) >= 0;
     }
 
+
     /**
      * Helper method that returns all Strings present inside a With block
      * @param with With block from the DocumentModel
@@ -198,17 +198,23 @@ public class DiagnosticUtils {
         return stringMap;
     }
 
+
     /**
      * Helper method to extract a String from inside ${{ }}
      * @param input String to extract from
-     * @return extracted String
+     * @return extracted Strings
      */
-    public static String getBetweenBraces(String input) {
+    public static List<String> getBetweenBraces(String input) {
+        List<String> matches = new ArrayList<>();
         Pattern pattern = Pattern.compile("\\$\\{\\{(.*?)}}");
-        var matcher = pattern.matcher(input);
-        if (!matcher.find()) return null;
-        return matcher.group(1);
+        Matcher matcher = pattern.matcher(input);
+        while (matcher.find()) {
+            matches.add(matcher.group(1).trim());
+        }
+
+        return matches;
     }
+
 
     /**
      * Helper method to apply a function at each Job and Step
@@ -233,17 +239,93 @@ public class DiagnosticUtils {
         });
     }
 
+
     /**
-     * Helper method to check if a string value is unsafe/untrusted
-     * @param input string to check
-     * @return true if the input string does match the untrusted inputs
+     * Functional interface to allow passing 3 argument functions into methods
+     * @param <A> first parameter
+     * @param <B> second parameter
+     * @param <C> third parameter
      */
-    public static boolean isUnsafeInput(String input) {
-        return Arrays.stream(untrustedInputs).anyMatch(untrustedInput -> Pattern.matches(untrustedInput, input));
+    @FunctionalInterface
+    public interface TriFunction<A,B,C> {
+        void apply(A a, B b, C c);
     }
 
+
+    /**
+     * Helper method to apply a function at each Job and Step, except this version passes diagnostics through to the method
+     * @param checkUsesWith method that takes in the Uses and With blocks
+     * @param document      documentModel containing Jobs and Steps
+     * @param diagnostics   list of diagnostics from Jobs and Steps
+     */
+    public static void atJobsStepsDiagnosticPassthrough(
+            TriFunction<Located<String>, DocumentModel.With, List<Diagnostic>> checkUsesWith,
+            DocumentModel document, List<Diagnostic> diagnostics) {
+        document.model().jobs().forEach(job -> {
+            checkUsesWith.apply(job.uses(), job.with(), diagnostics);
+            job.steps().forEach(step -> checkUsesWith.apply(step.uses(), step.with(), diagnostics));
+        });
+    }
+
+
+    /**
+     * Helper method to check if the input as been assigned in any previous steps or inside workflow_dispatch
+     * @param inputToSearch input to search for
+     * @param documentModel model to search through
+     * @return the Located<> of the location in which the input was assigned
+     */
+    public static Located<?> searchInputAssignment(String inputToSearch, DocumentModel documentModel) {
+        var withAssignment =  documentModel.model().jobs().stream()
+                .flatMap(job -> job.steps().stream())
+                .filter(step -> step.with() != null)
+                .flatMap(step -> getWithStrings(step.with()).entrySet().stream())
+                .filter(entry -> inputToSearch.equals(entry.getKey()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+        if (withAssignment != null) return withAssignment;
+
+        return documentModel.model().on().workflowEvents().stream()
+                .map(WorkflowEvents.WorkflowEvent::workflowDispatch)
+                .filter(Objects::nonNull)
+                .filter(dispatch -> dispatch.inputs() != null)
+                .flatMap(dispatch -> dispatch.inputs().stream())
+                .filter(input -> input.value().key().equals(inputToSearch))
+                .findFirst()
+                .orElse(null);
+    }
+
+
+
+    /**
+     * Helper method to check if strings are unsafe/untrusted
+     * @param input strings to check
+     * @return true if the input string does match the untrusted inputs
+     */
+    public static boolean isUnsafeInput(List<String> input) {
+        return input.stream().anyMatch(
+                str -> Arrays.stream(untrustedInputs).anyMatch(
+                        untrustedInput -> Pattern.matches(untrustedInput, str)
+                )
+        );
+    }
+
+    public static List<String> getIfInputStar(List<String> input) {
+        return input.stream()
+                .filter(str -> Pattern.matches("inputs\\.[\\w.-]*", str))
+                .toList();
+    }
+
+
+    /**
+     * Checks if the uses or with are not checkable
+     * @param uses keyword
+     * @param with keyword
+     * @return true if either the uses or with is uncheckable
+     */
     public static boolean isNull(Located<String> uses ,DocumentModel.With with) {
          return uses == null || with == null || with.mappings().isEmpty();
     }
+
 }
 

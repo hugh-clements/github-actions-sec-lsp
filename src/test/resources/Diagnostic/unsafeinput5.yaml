@@ -1,0 +1,23 @@
+name: Unsafe Code Injection Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      injectedScript:
+        description: "User-controlled script snippet"
+        required: true
+        default: "console.log('Hello from injected input');"
+
+jobs:
+  vulnerable-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Unsafe use of input in github-script
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Directly interpolating user input!
+            ${{ inputs.injectedScript }}
+
+    

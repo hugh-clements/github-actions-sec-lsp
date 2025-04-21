@@ -1,0 +1,23 @@
+name: Dangerous Workflow Example
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  insecure-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dangerous script interpolation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "${{ github.event.issue.title }}";
+            console.log("Issue title: " + title);
+
+      - name: Another injection
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = "${{ github.event.issue.body }}";
+            console.log("Issue body: " + body);

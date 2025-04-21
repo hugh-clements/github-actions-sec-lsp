@@ -2,26 +2,40 @@ package diagnostics;
 
 import org.junit.jupiter.api.Test;
 import org.server.diagnostic.CommandExecutionDiagnosticProvider;
+import org.server.diagnostic.DiagnosticBuilderService;
 
 import java.io.IOException;
 
-import static diagnostics.UtilsTest.getModel;
+import static diagnostics.TestUtils.getModel;
 
-public class CommandExecutionTest {
+class CommandExecutionTest {
 
     private static final CommandExecutionDiagnosticProvider diagnosticProvider = new CommandExecutionDiagnosticProvider();
 
     @Test
-    public void testNoIssues() throws IOException {
+    void testNoIssues() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/commandexecution1.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
         assert diagnostics.isEmpty();
     }
 
     @Test
-    public void testSingleIssue() throws IOException {
+    void testSingleInWithStep() throws IOException {
         var model = getModel("src/test/resources/Diagnostic/commandexecution2.yaml");
         var diagnostics = diagnosticProvider.diagnose(model.value());
+        assert diagnostics.stream().anyMatch(diagnostic -> diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.COMMAND_EXECUTION.toString()));
+        System.err.println(diagnostics);
+        assert diagnostics.size() == 1;
+    }
 
+    @Test
+    void testSingleInputs() throws IOException {
+        var model = getModel("src/test/resources/Diagnostic/commandexecution3.yaml");
+        var diagnostics = diagnosticProvider.diagnose(model.value());
+        System.err.println(diagnostics);
+        assert diagnostics.stream().anyMatch(diagnostic ->
+                diagnostic.getCode().getLeft().equals(DiagnosticBuilderService.DiagnosticType.COMMAND_EXECUTION.toString())
+                        && diagnostic.getRelatedInformation() != null
+        );        assert diagnostics.size() == 1;
     }
 }

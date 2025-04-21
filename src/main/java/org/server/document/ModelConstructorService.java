@@ -13,6 +13,7 @@ import java.io.StringReader;
 import java.util.*;
 
 import static org.server.document.Located.locate;
+import static org.server.document.WorkflowEvents.InputType.toInputType;
 
 /**
  * Service that constructs a new DocumentModel to reflect the client state
@@ -146,7 +147,7 @@ public class ModelConstructorService {
                 }
                 mappingToMap(node).forEach((s, n) -> {
                     switch (s) {
-                        case "inputs" -> callBuilder.input(n);
+                        case "inputs" -> callBuilder.inputs(parseInputs((MappingNode) n));
                         case "outputs" -> callBuilder.output(n);
                         case "secrets" -> callBuilder.secrets(parseSecrets(n));
                         default -> throw new IllegalArgumentException("Failed to parse 'WorkflowEvent' node, unexpected node type");
@@ -177,13 +178,8 @@ public class ModelConstructorService {
                     builder.workflowDispatch(dispatchBuilder.build()).build();
                     break;
                 }
-                mappingToMap(getSingletonMapValue((MappingNode) node)).forEach( (s, n) -> {
-                    if (s.equals("input")) {
-                        dispatchBuilder.input(n);
-                    } else if (s.equals("output")) {
-                        dispatchBuilder.output(n);
-                    }
-                });
+                if (!getSingletonMapKey((MappingNode) node).equals("inputs")) break;
+                dispatchBuilder.inputs(parseInputs((MappingNode) getSingletonMapValue((MappingNode) node)));
                 builder.workflowDispatch(dispatchBuilder.build());
             }
             default -> throw new IllegalArgumentException("Failed to parse 'WorkflowEvent' node, unexpected node type");
@@ -191,8 +187,35 @@ public class ModelConstructorService {
         return builder.build();
     }
 
+
+    /** Parsing input **/
+    private List<Located<WorkflowEvents.Input>> parseInputs(MappingNode inputsNode) {
+        logger.info("Parsing Input");
+        var inputs = new ArrayList<Located<WorkflowEvents.Input>>();
+        mappingToMap(inputsNode).forEach((string, node) -> {
+            var builder = WorkflowEvents.Input.builder();
+            builder.key(string);
+            mappingToMap(node).forEach( (s, n) -> {
+                switch (s) {
+                    case "description" -> builder.description(parseToString(n));
+                    case "required" -> builder.required(parseToBoolean(n));
+                    case "default" -> builder.defaultValue(parseToString(n));
+                    case "type" -> builder.inputType(toInputType(parseToString(n)));
+                    case "options" -> builder.options(n);
+                    default -> throw new IllegalStateException("Failed to parse 'WorkflowEvent' node, unexpected node: " + n);
+                }
+            });
+            inputs.add(locate(node ,builder.build()));
+        });
+
+
+
+
+        return inputs;
+    }
+
     /** Parsing ScalarNode Event with no arguments **/
-    public List<DocumentModel.Event> parseSimpleEvent(ScalarNode eventNode) {
+    private List<DocumentModel.Event> parseSimpleEvent(ScalarNode eventNode) {
         logger.info("Parsing simple Event");
         var builder = DocumentModel.Event.builder();
         builder.eventName(eventNode.getValue());
@@ -200,7 +223,7 @@ public class ModelConstructorService {
     }
 
     /** Parsing a Sequence of Events with no arguments **/
-    public List<DocumentModel.Event> parseSimpleEventSequence(SequenceNode eventSequenceNode) {
+    private List<DocumentModel.Event> parseSimpleEventSequence(SequenceNode eventSequenceNode) {
         logger.info("Parsing simple Event sequence");
         List<DocumentModel.Event> event = new ArrayList<>();
         eventSequenceNode.getValue().forEach( s -> {
@@ -279,7 +302,7 @@ public class ModelConstructorService {
     }
 
     /** Parsing ScalarNode of permissions **/
-    public Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> parseScalarPermissions(String permissionLevel) {
+    private Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> parseScalarPermissions(String permissionLevel) {
         logger.info("Parsing scalar permissions");
         var level = switch (permissionLevel) {
             case "read-all" -> SecretsAndPermissions.PermissionLevel.READ;
@@ -295,7 +318,7 @@ public class ModelConstructorService {
     }
 
     /** Parsing MappingNode of permissions **/
-    public Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> parseMappingPermissions(MappingNode mappingNode) {
+    private Map<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel> parseMappingPermissions(MappingNode mappingNode) {
         logger.info("Parsing mapping permissions");
         var map = new HashMap<SecretsAndPermissions.PermissionType, SecretsAndPermissions.PermissionLevel>();
         mappingToMap(mappingNode).forEach((string,node) -> {
@@ -380,7 +403,6 @@ public class ModelConstructorService {
                 switch (node) {
                     case MappingNode m -> builder.mapping(getSingletonMapKey(m), locate(m,getSingletonMapValueString(m)));
                     case ScalarNode s -> builder.value(locate(s,parseToString(s)));
-                    //TODO add sequence node
                     default -> throw new IllegalArgumentException("Unexpected node type in With SequenceNode: " + node);
                 }
             });
@@ -424,6 +446,15 @@ public class ModelConstructorService {
      */
     private String parseToString(Node node) {
         return ((ScalarNode) node).getValue();
+    }
+
+    /**
+     * Helper method to convert node to a boolean
+     * @param node ScalarNode that contains a boolean
+     * @return boolean result
+     */
+    private boolean parseToBoolean(Node node) {
+        return Boolean.parseBoolean(parseToString(node));
     }
 
     /**

@@ -1,0 +1,18 @@
+name: Dangerous Workflow Example
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  insecure-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dangerous script interpolation
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = "${{ github.event.issue.title }}";
+            const title2 = "github.event.workflow_run.head_branch"
+
+

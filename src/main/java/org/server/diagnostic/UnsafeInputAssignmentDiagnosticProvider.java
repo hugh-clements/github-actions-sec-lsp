@@ -1,6 +1,5 @@
 package org.server.diagnostic;
 
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
@@ -28,11 +27,12 @@ public class UnsafeInputAssignmentDiagnosticProvider implements DiagnosticProvid
 
     private void checkInputAssignment(List<Diagnostic> diagnostics, DocumentModel.With with) {
         if (with == null || with.mappings().isEmpty()) return;
-        getWithStrings(with).forEach( (withKey, withValue) -> {
-           var betweenBraces = getBetweenBraces(withValue.value());
-           if (betweenBraces == null) return;
-           if (isUnsafeInput(betweenBraces))
-               diagnostics.add(getDiagnostic(withValue, DiagnosticBuilderService.DiagnosticType.UNSAFE_INPUT_ASSIGNMENT));
+        getWithStrings(with).forEach( (_, withValue) -> {
+            var betweenBraces = getBetweenBraces(withValue.value());
+            if (betweenBraces.isEmpty()) return;
+            if (isUnsafeInput(betweenBraces) || !getIfInputStar(betweenBraces).isEmpty()) {
+                diagnostics.add(getDiagnostic(withValue, DiagnosticBuilderService.DiagnosticType.UNSAFE_INPUT_ASSIGNMENT));
+            }
        });
     }
 

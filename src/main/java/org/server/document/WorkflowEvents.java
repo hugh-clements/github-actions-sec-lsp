@@ -2,7 +2,6 @@ package org.server.document;
 
 import lombok.Builder;
 import org.yaml.snakeyaml.nodes.Node;
-
 import java.util.List;
 import java.util.Map;
 
@@ -17,9 +16,9 @@ public class WorkflowEvents {
 
     @Builder
     public record WorkflowCall(
-        Node input,
-        Node output,
-        Map<String, SecretsAndPermissions.Secret> secrets
+            List<Located<Input>> inputs,
+            Node output,
+            Map<String, SecretsAndPermissions.Secret> secrets
 
     ) {}
 
@@ -33,7 +32,37 @@ public class WorkflowEvents {
 
     @Builder
     public record WorkflowDispatch(
-        Node input,
-        Node output
+            List<Located<Input>> inputs,
+            Node output
     ) {}
+
+    @Builder
+    public record Input(
+            String key,
+            boolean required,
+            String description,
+            String defaultValue,
+            InputType inputType,
+            Node options
+    ) {}
+
+
+    public enum InputType {
+        BOOLEAN,
+        CHOICE,
+        NUMBER,
+        ENVIRONMENT,
+        STRING;
+
+        public static InputType toInputType(String stringType) {
+            return switch (stringType) {
+                case "boolean" -> InputType.BOOLEAN;
+                case "choice" -> InputType.CHOICE;
+                case "number" -> InputType.NUMBER;
+                case "string" -> InputType.STRING;
+                case "environment" -> InputType.ENVIRONMENT;
+                default -> throw new IllegalArgumentException("Unsupported input type: " + stringType);
+            };
+        }
+    }
 }

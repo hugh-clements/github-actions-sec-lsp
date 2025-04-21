@@ -1,0 +1,20 @@
+name: Unsafe Input Assignment Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      attacker_input:
+        description: "Untrusted input from user"
+        required: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use untrusted input in step
+        uses: some-action/example-action@v1
+        with:
+          argument: ${{ github.event.pull_request.title }}

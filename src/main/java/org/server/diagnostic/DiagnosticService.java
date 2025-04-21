@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
 import org.server.document.DocumentModel;
 import org.server.document.Located;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,14 +18,15 @@ public class DiagnosticService {
     static Logger logger = LogManager.getLogger(DiagnosticService.class);
     private final List<DiagnosticProvider> diagnosticProviders;
 
+
     /**
      * Instantiating a diagnostic provider for each rule
      */
     public DiagnosticService() {
         diagnosticProviders = List.of(
                 new RunnerHijackingDiagnosticProvider(),
-                new ActionReferencingDiagnosticProvider(),
                 new UnsafeInputAssignmentDiagnosticProvider(),
+                new ActionReferencingDiagnosticProvider(),
                 new WorkflowRunDiagnosticProvider(),
                 new PWNRequestDiagnosticProvider(),
                 new CodeInjectionDiagnosticProvider(),
@@ -41,14 +41,14 @@ public class DiagnosticService {
      * @return list of all diagnostics
      */
     public List<Diagnostic> diagnose(Located<DocumentModel> document) {
-        logger.info("Diagnosing {}", document);
+        logger.info("Diagnosing all");
         var fileScopedDiagnostics = getFileScopedDiagnostics(document);
         if (!fileScopedDiagnostics.isEmpty()) {
             return fileScopedDiagnostics;
         }
-        return new ArrayList<>(diagnosticProviders.stream()
+        return diagnosticProviders.stream()
                 .flatMap(instance -> instance.diagnose(document.value()).stream())
-                .toList());
+                .toList();
     }
 
     /**
@@ -59,16 +59,16 @@ public class DiagnosticService {
     public static List<Diagnostic> getFileScopedDiagnostics(Located<DocumentModel> locatedDocument) {
         var document = locatedDocument.value();
         var list = new ArrayList<Diagnostic>();
-        //First checking if the Document is in yaml
+        //First checking if the Document is in YAML
         if (!document.lang().equals("yaml")) {
             list.add(getDiagnostic(locatedDocument,DiagnosticBuilderService.DiagnosticType.INCORRECT_LANG));
         }
-        //Check if document is valid yaml
+        //Check if a document is valid YAML
         if (document.model() == null) {
             list.add(getDiagnostic(locatedDocument, DiagnosticBuilderService.DiagnosticType.NOT_VALID_YAML));
         }
-        //Check if document is in correct directory
-        if (document.documentURI().contains("github/workflows/")) {
+        //Check if a document is in the correct directory
+        if (!document.documentURI().contains("github/workflows/")) {
             list.add(getDiagnostic(locatedDocument,DiagnosticBuilderService.DiagnosticType.INCORRECT_DIRECTORY));
         }
         return list;

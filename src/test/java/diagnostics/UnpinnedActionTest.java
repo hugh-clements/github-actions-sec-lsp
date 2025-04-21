@@ -6,7 +6,7 @@ import org.server.diagnostic.DiagnosticBuilderService;
 
 import java.io.IOException;
 
-import static diagnostics.UtilsTest.getModel;
+import static diagnostics.TestUtils.getModel;
 
 public class UnpinnedActionTest {
 
