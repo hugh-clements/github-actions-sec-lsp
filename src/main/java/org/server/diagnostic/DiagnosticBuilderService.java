@@ -1,10 +1,7 @@
 package org.server.diagnostic;
 
 
-import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DiagnosticRelatedInformation;
-import org.eclipse.lsp4j.DiagnosticSeverity;
-import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.*;
 import org.server.document.Located;
 import java.util.ArrayList;
 
@@ -16,6 +13,10 @@ import static org.server.document.Located.locatedToRange;
 public class DiagnosticBuilderService {
 
     /**
+     *
+     */
+    private static final String LSP_READ_ME_URL = "https://github.com/hugh-clements/github-actions-sec-lsp/blob/main/README.md";
+    /**
      * Creates diagnostic from provided data
      * @param located accepts any part of the model that can be located
      * @param diagnosticType the type of diagnostic to create
@@ -23,10 +24,14 @@ public class DiagnosticBuilderService {
      */
     public static Diagnostic getDiagnostic(Located<?> located, DiagnosticType diagnosticType) {
         var diagnostic = new Diagnostic();
+        diagnostic.setSource("GitHub Actions Security LSP");
         diagnostic.setRange(locatedToRange(located));
         diagnostic.setSeverity(getSeverity(diagnosticType));
         diagnostic.setMessage(getDiagnosticMessage(diagnosticType));
         diagnostic.setCode(diagnosticType.toString());
+        var description = new DiagnosticCodeDescription();
+        description.setHref(LSP_READ_ME_URL + "#" + diagnosticType.toString().toLowerCase());
+        diagnostic.setCodeDescription(description);
         return diagnostic;
     }
 

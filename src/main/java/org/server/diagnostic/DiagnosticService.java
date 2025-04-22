@@ -18,7 +18,6 @@ public class DiagnosticService {
     static Logger logger = LogManager.getLogger(DiagnosticService.class);
     private final List<DiagnosticProvider> diagnosticProviders;
 
-
     /**
      * Instantiating a diagnostic provider for each rule
      */

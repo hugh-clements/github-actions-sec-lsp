@@ -12,7 +12,7 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * Language Server implementation class that is started by Start
+ * Language Server implementation class that is started by the Start class
  */
 public class ActionsLanguageServer  implements org.eclipse.lsp4j.services.LanguageServer, LanguageClientAware {
 
