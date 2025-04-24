@@ -30,7 +30,7 @@ public class DiagnosticBuilderService {
         diagnostic.setMessage(getDiagnosticMessage(diagnosticType));
         diagnostic.setCode(diagnosticType.toString());
         var description = new DiagnosticCodeDescription();
-        description.setHref(LSP_READ_ME_URL + "#" + diagnosticType.toString().toLowerCase());
+        description.setHref(LSP_READ_ME_URL + "###" + diagnosticType.toString().toLowerCase());
         diagnostic.setCodeDescription(description);
         return diagnostic;
     }
