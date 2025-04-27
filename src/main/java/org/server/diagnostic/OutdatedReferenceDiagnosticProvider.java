@@ -34,7 +34,8 @@ public class OutdatedReferenceDiagnosticProvider implements DiagnosticProvider {
 
     private void checkOutdatedReference(List<Diagnostic> diagnostics, Located<String> uses) {
         if (uses == null) return;
-        var usesAction = uses.value().split("[/@]");
+        if (!uses.value().contains("@")) return;
+        var usesAction = uses.value().replace(".github/workflows/", "").split("[/@]");
         if (usesAction.length < 2) return;
         var currentCommit = getCommitFromHash(usesAction[0],usesAction[1],usesAction[usesAction.length-1]);
         if (currentCommit ==  null) return;

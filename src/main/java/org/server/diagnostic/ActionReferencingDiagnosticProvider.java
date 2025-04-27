@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.server.diagnostic.DiagnosticBuilderService.getDiagnostic;
-import static org.server.diagnostic.DiagnosticUtils.*;
+import static org.server.diagnostic.DiagnosticUtils.COMMIT_HASH_REGEX;
+import static org.server.diagnostic.DiagnosticUtils.getRepoStatus;
 
 public class ActionReferencingDiagnosticProvider implements DiagnosticProvider {
 
@@ -32,7 +33,7 @@ public class ActionReferencingDiagnosticProvider implements DiagnosticProvider {
         var value = uses.value();
         switch (value) {
             case String a when a.contains("docker://") -> {/*This is an empty return */}
-            case String b when b.contains("./") -> {/*This is an empty return */}
+            case String b when !b.contains("@") -> {/*This is an empty return */}
             default -> {
                 var split = value.split("[/@]");
                 if (split.length < 2) return;

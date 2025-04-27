@@ -25,4 +25,16 @@ class FullDiagnosticsTest {
 
     }
 
+    @Test
+    void testFullDiagnostics2() throws IOException {
+        var model = getModel("src/test/resources/Diagnostic/fulldiagnostics3.yaml");
+        var diagnostics = diagnosticService.diagnose(model);
+    }
+
+    @Test
+    void testFullDiagnostics3() throws IOException {
+        var model = getModel("src/test/resources/Diagnostic/fulldiagnostics2.yaml");
+        var diagnostics = diagnosticService.diagnose(model);
+    }
+
 }

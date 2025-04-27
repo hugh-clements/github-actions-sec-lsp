@@ -2,8 +2,6 @@ package org.server.document;
 
 import lombok.Builder;
 import lombok.Singular;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.yaml.snakeyaml.nodes.Node;
 
 import java.util.List;
@@ -17,7 +15,6 @@ import java.util.Map;
  */
 public record DocumentModel(String lang, String documentURI, org.server.document.DocumentModel.Model model) {
 
-    static Logger logger = LogManager.getLogger(DocumentModel.class);
 
     @Builder
     public record Model(
@@ -117,7 +114,8 @@ public record DocumentModel(String lang, String documentURI, org.server.document
         MACOS_13,
         MACOS_14,
         MACOS_15,
-        MACOS_LATEST;
+        MACOS_LATEST,
+        MATRIX;
 
         public static Runner toRunner(String stringRunner) {
             return switch (stringRunner) {
@@ -135,10 +133,8 @@ public record DocumentModel(String lang, String documentURI, org.server.document
                 case "macos-14" -> MACOS_14;
                 case "macos-15" -> MACOS_15;
                 case "macos-latest" -> MACOS_LATEST;
-                default -> {
-                    logger.info(stringRunner);
-                    throw new IllegalArgumentException("Unsupported Runner: " + stringRunner);
-                }
+                case String s when !s.contains("matrix") -> MATRIX;
+                default -> throw new IllegalStateException("Unexpected runner: " + stringRunner);
             };
         }
     }

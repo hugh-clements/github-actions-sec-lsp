@@ -117,6 +117,11 @@ public class ModelConstructorService {
         if (eventNode instanceof ScalarNode) {
             return builder.build();
         }
+        if (eventNode instanceof SequenceNode) {
+            builder.schedule(eventNode);
+            return builder.build();
+        }
+        assert eventNode instanceof MappingNode;
         var eventValue = getSingletonMapValue((MappingNode) eventNode);
         if (eventValue instanceof SequenceNode) {
             builder.filter(eventValue);

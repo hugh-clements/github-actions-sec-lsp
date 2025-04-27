@@ -3,6 +3,7 @@ package org.server.diagnostic;
 
 import org.eclipse.lsp4j.*;
 import org.server.document.Located;
+
 import java.util.ArrayList;
 
 import static org.server.document.Located.locatedToRange;
@@ -30,7 +31,7 @@ public class DiagnosticBuilderService {
         diagnostic.setMessage(getDiagnosticMessage(diagnosticType));
         diagnostic.setCode(diagnosticType.toString());
         var description = new DiagnosticCodeDescription();
-        description.setHref(LSP_READ_ME_URL + "###" + diagnosticType.toString().toLowerCase());
+        description.setHref(LSP_READ_ME_URL + "#" + diagnosticType.toString().toLowerCase());
         diagnostic.setCodeDescription(description);
         return diagnostic;
     }
@@ -100,7 +101,7 @@ public class DiagnosticBuilderService {
             case UNPINNED_ACTION -> "Referencing actions by branch or tag allows code to change without notice. To avoid supply chain attacks, reference actions using a specific commit hash.";
             case WORKFLOW_RUN -> "An action triggered by another workflow ('workflow_run') can execute code from attacker-controlled branches if the trigger is misconfigured." +
                     " Ensure all triggered actions treat such sources as untrusted.";
-            case UNSAFE_INPUT_ASSIGNMENT -> "Attacker-controlled inputs can be passed into 'with' fields unsanitized, leading to code injection or command execution. " +
+            case UNSAFE_INPUT_ASSIGNMENT -> "Attacker-controlled inputs can be passed into 'with' fields unsanitised, leading to code injection or command execution. " +
                     "Always validate external inputs before use.";
             case OUTDATED_REFERENCE -> "The action or repository reference points to an outdated commit, which might lack security patches. Update to a newer, reviewed commit.";
         };

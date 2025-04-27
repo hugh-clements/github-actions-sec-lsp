@@ -1,0 +1,23 @@
+name: Milestone Triggered Workflow
+
+on:
+  milestone:
+    types:
+      - opened
+      - closed
+      - edited
+
+jobs:
+  milestone_job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show milestone info
+        run: |
+          echo "Milestone Title: ${{ github.event.milestone.title }}"
+          echo "Milestone Description: ${{ github.event.milestone.description }}"
+          echo "Milestone State: ${{ github.event.milestone.state }}"
+          echo "Milestone Due Date: ${{ github.event.milestone.due_on }}"

@@ -161,4 +161,12 @@ class NodeParserTest {
         Utils.prettyPrint(parsed.value());
     }
 
+    @Test
+    void testNodeParserMatrix1() throws IOException {
+        String toParse = Files.readString(Path.of("src/test/resources/DocumentSync/testMatrix1.yaml"));
+        var modelConstructorService = new ModelConstructorService();
+        var parsed = modelConstructorService.modelConstructor("yaml", "", toParse);
+        Utils.prettyPrint(parsed.value());
+    }
+
 }
