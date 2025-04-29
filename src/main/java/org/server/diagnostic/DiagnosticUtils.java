@@ -263,6 +263,7 @@ public class DiagnosticUtils {
             DocumentModel document, List<Diagnostic> diagnostics) {
         document.model().jobs().forEach(job -> {
             checkUsesWith.apply(job.uses(), job.with(), diagnostics);
+            if (job.steps() == null) return;
             job.steps().forEach(step -> checkUsesWith.apply(step.uses(), step.with(), diagnostics));
         });
     }

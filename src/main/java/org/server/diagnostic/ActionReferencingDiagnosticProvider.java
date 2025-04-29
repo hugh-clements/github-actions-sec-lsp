@@ -23,6 +23,7 @@ public class ActionReferencingDiagnosticProvider implements DiagnosticProvider {
         var diagnostics = new ArrayList<Diagnostic>();
         document.model().jobs().forEach(job -> {
             checkUnpinnedAction(diagnostics, job.uses(), document);
+            if (job.steps() == null) return;
             job.steps().forEach(step -> checkUnpinnedAction(diagnostics, step.uses(), document));
         });
         return diagnostics;

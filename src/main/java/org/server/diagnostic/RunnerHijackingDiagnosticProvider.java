@@ -18,11 +18,14 @@ public class RunnerHijackingDiagnosticProvider implements DiagnosticProvider{
     public List<Diagnostic> diagnose(DocumentModel document) {
         logger.info("Diagnosing Runner Hijacking");
         var diagnostics = new ArrayList<Diagnostic>();
-        document.model().jobs().forEach(job -> job.runsOn().forEach(runnerLocated -> {
-            //Checking if any self-hosted runners are being used
-            if (runnerLocated.value() != DocumentModel.Runner.SELF_HOSTED) return;
-            diagnostics.add(getDiagnostic(runnerLocated, DiagnosticBuilderService.DiagnosticType.RUNNER_HIJACKER));
-        }));
+        document.model().jobs().forEach(job -> {
+            if (job.runsOn() == null) return;
+            job.runsOn().forEach(runnerLocated -> {
+                //Checking if any self-hosted runners are being used
+                if (runnerLocated.value() != DocumentModel.Runner.SELF_HOSTED) return;
+                diagnostics.add(getDiagnostic(runnerLocated, DiagnosticBuilderService.DiagnosticType.RUNNER_HIJACKER));
+            });
+        });
         return diagnostics;
     }
 }

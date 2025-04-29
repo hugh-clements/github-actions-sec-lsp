@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.lsp4j.Diagnostic;
 import org.server.document.DocumentModel;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class UnsafeInputAssignmentDiagnosticProvider implements DiagnosticProvid
         var diagnostics = new ArrayList<Diagnostic>();
         document.model().jobs().forEach( job -> {
             checkInputAssignment(diagnostics, job.with());
+            if (job.steps() == null) return;
             job.steps().forEach( step -> checkInputAssignment(diagnostics, step.with()));
         });
         return diagnostics;

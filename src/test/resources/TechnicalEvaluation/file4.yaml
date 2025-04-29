@@ -1,0 +1,18 @@
+name: Unsafe Input Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_command:
+        description: 'Shell command to run (UNSAFE!!)'
+        required: true
+        default: 'echo Hello, world!'
+
+jobs:
+  unsafe-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run user-supplied command (UNSAFE)
+        run: |
+          echo "Running user command: ${{ github.event.inputs.run_command }}"
+          eval "${{ inputs.run_command }}"

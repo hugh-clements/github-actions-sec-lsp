@@ -1,0 +1,17 @@
+name: Self-Hosted Runner Example
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-on-self-hosted:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run echo
+        run: |
+          echo "Running on self-hosted runner"

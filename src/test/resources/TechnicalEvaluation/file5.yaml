@@ -1,0 +1,12 @@
+name: Repojackable workflow
+on:
+  push:
+    branches: [ main ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: test redirect
+        uses: nick-invision/retry@d6b241c90e867e2d605cfe1b48976c9c6e5337dc
+
+

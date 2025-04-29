@@ -97,7 +97,7 @@ public class ModelConstructorService {
     }
 
     /** Parsing Mapping of Events **/
-    public DocumentModel.OnObject parseEventMapping(MappingNode eventMappingNode) {
+    private DocumentModel.OnObject parseEventMapping(MappingNode eventMappingNode) {
         logger.info("Parsing Event mapping");
         List<DocumentModel.Event> events = new ArrayList<>();
         List<WorkflowEvents.WorkflowEvent> workflowEvents = new ArrayList<>();
@@ -111,7 +111,7 @@ public class ModelConstructorService {
     }
 
     /** Parsing Event **/
-    public DocumentModel.Event parseEvent(String name, Node eventNode) {
+    private DocumentModel.Event parseEvent(String name, Node eventNode) {
         logger.info("Parsing Event");
         var builder = DocumentModel.Event.builder().eventName(name);
         if (eventNode instanceof ScalarNode) {
@@ -140,7 +140,7 @@ public class ModelConstructorService {
     }
 
     /** Parsing WorkflowEvent **/
-    public WorkflowEvents.WorkflowEvent parseWorkflowEvent(String name, Node node) {
+    private WorkflowEvents.WorkflowEvent parseWorkflowEvent(String name, Node node) {
         logger.info("Parsing WorkflowEvent");
         var builder = WorkflowEvents.WorkflowEvent.builder();
         switch (name) {
